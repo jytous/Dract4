@@ -3,192 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DRACT4 - Ajedrez Puzzle Evolucionado</title>
+    <title>DRACT 4 - Cyber Neon Edition</title>
     <!-- Tipografía SUSE -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@300;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            /* TEMA AZUL (DRACT 3 - 3x3) */
-            --bg-color: #f0f4f8;
-            --dark-square: #4b7399;
-            --light-square: #eaeff4;
-            --primary: #4b7399;
-            --primary-hover: #3b5b7a;
-            --primary-disabled: #9cb1c4;
-            --text-color: #222;
-            --highlight: rgba(255, 255, 0, 0.5);
-            --border-color: #222;
-            --grid-size: 3; 
+            /* PALETA CYBER DARK NEÓN */
+            --bg-color: #0b0e14;
+            --surface-dark: rgba(20, 25, 35, 0.85);
+            --surface-border: rgba(255, 42, 84, 0.25);
+            
+            --dark-square: #161b26;
+            --light-square: #252d3d;
+            
+            --primary: #ff2a54; /* Fucsia Láser */
+            --primary-hover: #e01b43;
+            --primary-glow: rgba(255, 42, 84, 0.4);
+            
+            --accent-cyan: #00f0ff; /* Cyan Eléctrico */
+            --accent-cyan-glow: rgba(0, 240, 255, 0.35);
+            --accent-green: #00e676; /* Verde Victoria */
+            
+            --text-color: #f0f4f8;
+            --text-muted: #8a99ad;
+            --border-color: #ff2a54;
+            --grid-size: 4; 
         }
 
-        /* TEMA ROJO Y GRIS (DRACT 4 - 4x4) */
-        body.theme-red {
-            --bg-color: #fdfdfd;
-            --dark-square: rgb(180,0,0);
-            --light-square: rgb(213,213,213);
-            --primary: rgb(180,0,0);
-            --primary-hover: rgb(140,0,0);
-            --primary-disabled: rgb(213,213,213);
+        /* TEMA AZUL PARA LIGA 3X3 EN MODO PROGRESIÓN */
+        body.theme-blue {
+            --dark-square: #121e2b;
+            --light-square: #1e3044;
+            --primary: #00f0ff;
+            --primary-hover: #00c4d4;
+            --primary-glow: rgba(0, 240, 255, 0.4);
+            --border-color: #00f0ff;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
         body {
             font-family: 'SUSE', sans-serif;
             background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 10%, rgba(255, 42, 84, 0.08) 0%, transparent 60%);
             color: var(--text-color);
             margin: 0;
             padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: background-color 0.5s ease;
+            min-height: 100vh;
         }
 
-        /* --- DISEÑO BASE PARA PC --- */
+        /* --- ESTRUCTURA DRACT 3 (3 COLUMNAS) --- */
         .layout {
-            display: flex; flex-direction: row; flex-wrap: wrap; gap: 40px;
+            display: flex; flex-direction: row; flex-wrap: wrap; gap: 30px;
             justify-content: center; align-items: flex-start;
             max-width: 1200px; width: 100%; margin-top: 10px;
         }
 
         .col-left { display: flex; flex-direction: column; width: 280px; gap: 15px; }
-        .col-center { display: flex; flex-direction: column; align-items: center; width: 450px; gap: 15px; }
-        .col-right { display: flex; flex-direction: column; align-items: center; width: 250px; gap: 15px; }
+        .col-center { display: flex; flex-direction: column; align-items: center; width: 450px; gap: 12px; }
+        .col-right { display: flex; flex-direction: column; align-items: center; width: 260px; gap: 15px; }
 
-        h3 { margin-top: 0; text-align: center; font-size: 1.1rem; margin-bottom: 10px; font-weight: 700; }
+        h3 { margin-top: 0; text-align: center; font-size: 1rem; margin-bottom: 8px; font-weight: 800; letter-spacing: 1px; color: var(--accent-cyan); text-transform: uppercase; }
 
         .panel-box {
-            background: #fff; padding: 15px; border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%;
-            box-sizing: border-box; border: 2px solid var(--primary);
-            transition: border-color 0.5s ease;
+            background: var(--surface-dark);
+            border: 1px solid var(--surface-border);
+            backdrop-filter: blur(12px);
+            border-radius: 14px;
+            padding: 14px;
+            width: 100%;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
         }
 
-        .box-stats { margin-bottom: 0; padding: 12px; }
+        /* HUD STATS COMPACTO */
+        .box-stats { margin-bottom: 0; padding: 10px; }
         .stats-inner { display: flex; flex-direction: row; width: 100%; }
         .stat-group { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .stat-line { font-size: 0.9rem; margin: 0 0 5px 0; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; text-align: center;}
-        .stat-value { font-weight: 800; font-size: 1.8rem; color: var(--primary); transition: color 0.5s ease;}
-        
-        #obj-lbl { color: var(--primary); }
+        .stat-line { font-size: 0.65rem; margin: 0 0 2px 0; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; text-align: center;}
+        .stat-value { font-weight: 800; font-size: 1.4rem; color: var(--primary); text-shadow: 0 0 8px var(--primary-glow); transition: color 0.3s;}
 
-        .progression-text { font-size: 0.95rem; font-weight: 600; color: #444; margin-bottom: 5px; text-align: center; }
-        .streak-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
-        .dot { width: 15px; height: 15px; border-radius: 50%; background: #ccc; border: 2px solid #aaa; transition: all 0.3s;}
-        .dot.filled { background: #27ae60; border-color: #219653; }
-
-        .box-mode { width: 100%; margin-bottom: 0; }
-        .btn-mode { background-color: rgb(180,0,0); transition: background-color 0.3s; }
-        .btn-mode:hover { background-color: rgb(140,0,0); }
-        
-        .history-container { background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; width: 100%; border: 1px solid #ddd; }
+        /* HISTORIAL */
+        .history-container {
+            background: var(--surface-dark); border-radius: 12px; overflow: hidden; width: 100%;
+            border: 1px solid var(--surface-border); box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+        }
         table { width: 100%; border-collapse: collapse; text-align: center; }
-        th, td { padding: 10px 5px; border-bottom: 1px solid #ddd; font-size: 0.95rem; }
-        th { background-color: var(--primary); color: white; font-weight: 600; transition: background-color 0.5s ease;}
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .history-wrap { max-height: 250px; overflow-y: auto; }
+        th, td { padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+        th { background-color: rgba(255,42,84,0.15); color: var(--primary); font-weight: 700; }
+        tr:nth-child(even) { background-color: rgba(255,255,255,0.02); }
+        .history-wrap { max-height: 220px; overflow-y: auto; }
 
+        /* BOTONES COMPACTOS GENERALES */
         button {
-            color: #fff; border: none; padding: 12px; font-size: 1rem; cursor: pointer;
-            border-radius: 6px; font-family: 'SUSE', sans-serif; font-weight: 700;
-            transition: background-color 0.2s, transform 0.1s; width: 100%; box-sizing: border-box;
+            color: #fff; border: none; padding: 10px; font-size: 0.85rem; cursor: pointer;
+            border-radius: 8px; font-family: 'SUSE', sans-serif; font-weight: 800;
+            transition: all 0.15s ease; width: 100%; box-sizing: border-box;
         }
-        
-        .btn-blue { background-color: var(--primary); transition: background-color 0.5s ease; }
-        .btn-blue:hover:not(:disabled) { background-color: var(--primary-hover); }
-        .btn-blue:active:not(:disabled) { transform: scale(0.97); }
-        .btn-blue:disabled { background-color: var(--primary-disabled); color: #eef2f5; cursor: not-allowed; transform: none; }
 
-        .btn-action { background-color: #666; }
-        .btn-action:hover { background-color: #444; }
-        .btn-start { background-color: #222; margin-top: 15px; }
-        .btn-start:hover { background-color: #000; }
+        .btn-action { background-color: #252b3b; color: var(--text-muted); }
+        .btn-action:hover { background-color: #323a4d; color: #fff; }
+        .btn-start { background-color: #161b26; border: 1px solid rgba(255,255,255,0.1); margin-top: 10px; }
+        .btn-start:hover { background-color: #202738; }
 
-        .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .btn-undo { grid-column: span 2; background-color: #666; margin-top: 2px; }
-        .btn-undo:hover { background-color: #444; }
-
-        /* Miniaturas Manuales */
-        .mini-icons-container {
-            display: flex; justify-content: center; gap: 12px; margin-top: 5px;
-            background: var(--light-square); padding: 8px; border-radius: 6px; border: 2px solid var(--border-color);
-            transition: background-color 0.5s ease;
+        /* BOTONERA DE CONTROL SECUNDARIA PEQUEÑA */
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%;
+            background: var(--surface-dark); padding: 8px; border-radius: 12px;
+            border: 1px solid var(--surface-border);
         }
-        .mini-icons-container .piece-wrapper {
-            position: relative; width: 35px; height: 35px; cursor: pointer;
+        .controls-grid button {
+            padding: 7px 6px; font-size: 0.78rem; font-weight: 700; border-radius: 6px;
         }
-        .mini-icons-container .piece { width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }
-        
-        .badge {
-            position: absolute; top: -5px; right: -5px; background: #c0392b; color: white;
-            font-size: 0.7rem; font-weight: bold; padding: 2px 5px; border-radius: 50%;
-            display: none; border: 1px solid white;
+        .btn-blue {
+            background: linear-gradient(180deg, var(--primary) 0%, #b8002a 100%);
+            box-shadow: 0 3px 0 #700019, 0 0 10px var(--primary-glow);
         }
-        .show-badge .badge { display: block; }
+        .btn-blue:hover:not(:disabled) { filter: brightness(1.1); }
+        .btn-blue:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #700019; }
+        .btn-blue:disabled { background: #252b3b; color: #5a6578; box-shadow: none; cursor: not-allowed; }
 
-        .active-icon { filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.3)); opacity: 1; }
-        .inactive-icon { filter: invert(85%) sepia(15%) saturate(300%) hue-rotate(185deg) brightness(120%) contrast(80%); opacity: 0.3; }
+        .btn-undo { grid-column: span 2; background: #1c2230; color: #8a99ad; border: 1px solid rgba(255,255,255,0.08); padding: 6px; }
+        .btn-undo:hover { color: #fff; background: #252d3d; }
 
-        /* Dificultad manual */
-        .diff-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
-        .diff-controls button { width: auto; padding: 8px 15px; font-size: 1.2rem; }
-
-        /* Tableros Dinámicos */
+        /* TABLEROS DINÁMICOS Y OBJETIVO GIGANTE */
         .board {
             position: relative;
             display: grid; 
             grid-template-columns: repeat(var(--grid-size), 1fr); 
             grid-template-rows: repeat(var(--grid-size), 1fr);
-            border: 6px solid var(--border-color); width: 450px; height: 450px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3); background-color: var(--light-square);
-            transition: background-color 0.5s ease, border-color 0.5s ease;
+            border: 3px solid var(--border-color); width: 450px; height: 450px;
+            border-radius: 16px; overflow: hidden;
+            box-shadow: 0 0 25px var(--primary-glow), 0 12px 30px rgba(0,0,0,0.8);
+            background-color: var(--light-square);
+            transition: background-color 0.4s ease, border-color 0.4s ease;
         }
-        .board.mini { width: 200px; height: 200px; border-width: 4px; }
+        
+        /* TABLERO OBJETIVO GIGANTE Y DESTACADO (220px) */
+        .board.mini {
+            width: 220px; height: 220px;
+            border: 3px solid var(--accent-cyan);
+            border-radius: 12px;
+            box-shadow: 0 0 20px var(--accent-cyan-glow), 0 8px 16px rgba(0,0,0,0.6);
+        }
+
         .cell { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
-        #main-board .cell { cursor: pointer; transition: background-color 0.5s ease; }
+        #main-board .cell { cursor: pointer; }
         .cell.dark { background-color: var(--dark-square); }
         .cell.light { background-color: var(--light-square); }
-        .cell.selected::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--highlight); border: 4px solid #f1c40f; pointer-events: none; }
+        .cell.selected::after {
+            content: ''; position: absolute; inset: 0;
+            background-color: rgba(0, 240, 255, 0.25);
+            border: 3px solid var(--accent-cyan);
+            box-shadow: inset 0 0 10px var(--accent-cyan);
+            pointer-events: none;
+        }
 
-        /* MODO SOLUCIÓN - Tablero Gris e Inactivo */
+        /* MODO SOLUCIÓN (Gris) */
         .board-solution-locked {
-            --dark-square: #95a5a6 !important;
-            --light-square: #ecf0f1 !important;
-            border-color: #7f8c8d !important;
+            --dark-square: #2a303c !important;
+            --light-square: #3a4354 !important;
+            border-color: #5a6578 !important;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5) !important;
         }
-        .board-solution-locked .piece {
-            filter: grayscale(100%) drop-shadow(2px 4px 4px rgba(0,0,0,0.4)) opacity(0.65);
-        }
-        .board-solution-locked .piece-black {
-            filter: grayscale(100%) brightness(0) drop-shadow(2px 4px 4px rgba(0,0,0,0.4)) opacity(0.65);
-        }
+        .board-solution-locked .piece { filter: grayscale(100%) opacity(0.5); }
 
-        /* Capa SVG para las Flechas */
+        /* CAPA SVG FLECHAS */
         #board-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 100;
         }
 
-        /* Animaciones para la solución */
-        @keyframes blink-anim {
-            0% { filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.4)) scale(1); }
-            50% { filter: drop-shadow(0px 0px 15px #f1c40f) scale(1.15); }
-            100% { filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.4)) scale(1); }
-        }
-        @keyframes board-blink {
-            0% { transform: scale(1); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
-            50% { transform: scale(0.96); box-shadow: 0 0 30px var(--primary); }
-            100% { transform: scale(1); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
-        }
-        .board-blinking { animation: board-blink 0.5s ease-in-out infinite; }
-
-        /* Piezas Vectoriales */
+        /* PIEZAS VECTORIALES CON SOMBRA Y VOLUMEN 3D */
         .piece {
-            width: 85%; height: 85%; background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; 
-            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.4));
-            transition: filter 0.5s ease, opacity 0.5s ease;
+            width: 82%; height: 82%;
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            pointer-events: none; 
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.7));
+            transition: transform 0.2s ease, filter 0.3s ease;
         }
 
         .p-1 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 51 51'%3E%3Cg fill='none' fill-rule='evenodd' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22.5 11.63V6M20 8h5' stroke-linejoin='miter'/%3E%3Cpath d='M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5' fill='%23fff' stroke-linecap='butt' stroke-linejoin='miter'/%3E%3Cpath d='M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10.5 5 10.5v7' fill='%23fff'/%3E%3Cpath d='M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0'/%3E%3C/g%3E%3C/svg%3E"); }
@@ -196,107 +193,91 @@
         .p-3 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 51 51'%3E%3Cg fill='%23fff' fill-rule='evenodd' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5H11z' stroke-linecap='butt'/%3E%3Cpath d='M34 14l-3 3H14l-3-3'/%3E%3Cpath d='M31 17v12.5H14V17' stroke-linecap='butt' stroke-linejoin='miter'/%3E%3Cpath d='M31 29.5l1.5 2.5h-20l1.5-2.5'/%3E%3Cpath d='M11 14h23' fill='none' stroke-linejoin='miter'/%3E%3C/g%3E%3C/svg%3E"); }
         .p-4 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 51 51'%3E%3Cg fill='none' fill-rule='evenodd' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg fill='%23fff' stroke-linecap='butt'%3E%3Cpath d='M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2zM15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z'/%3E%3C/g%3E%3Cpath d='M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5' stroke-linejoin='miter'/%3E%3C/g%3E%3C/svg%3E"); }
         .p-5 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 49 49'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18'/%3E%3Cpath d='M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26.5 C 6,24 10,23 11,24 C 11,24 11,22 10,21 C 10,21 11,20.12 11,20 C 11,20 10.09,19 11,18 C 11,18 10,17 11,16 C 11,16 11,15 12,15 C 12,15 13,14 13,15 C 13,15 14,14 15,15 C 15,15 15,14 16,14 C 16,14 15.53,13.2 16,13 C 16,13 17,12 17,13 C 17,13 18,12 19,12 C 19,12 19,11 20,11 C 20,11 21,10 21,10 C 21,10 21.5,10 22,10 Z'/%3E%3Cpath d='M 20,8 C 18,6 16,6 14,8 C 15,10 16,10 18,10 C 19,10 19.5,9 20,8 Z'/%3E%3Cpath d='M 22,10 C 24,7 26,7 28,10 C 27,11 25.5,12 24,11 C 23,10 22.5,10 22,10 Z'/%3E%3Cpath d='M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 Z' fill='%23000'/%3E%3Cpath d='M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 Z' transform='matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)' fill='%23000'/%3E%3C/g%3E%3C/svg%3E"); }
-        
-        /* Kamikaze Negro */
-        .piece-black { filter: brightness(0) drop-shadow(2px 4px 4px rgba(0,0,0,0.4)); }
+        .piece-black { filter: brightness(0) drop-shadow(0 8px 10px rgba(0,0,0,0.8)); }
 
-        /* Obstáculos */
+        /* OBSTÁCULOS CYBER */
         .blocked {
             background-color: transparent !important;
-            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);
+            background-image: repeating-linear-gradient(45deg, rgba(255,42,84,0.05) 0, rgba(255,42,84,0.05) 10px, rgba(0,0,0,0.3) 10px, rgba(0,0,0,0.3) 20px);
             display: flex; justify-content: center; align-items: center;
         }
-        .blocked::before { content: '✖'; font-size: 2.5rem; color: rgba(0,0,0,0.7); font-weight: bold; }
+        .blocked::before { content: '✖'; font-size: 2rem; color: var(--primary); opacity: 0.6; }
+
+        /* MODALES */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(5, 7, 10, 0.85);
+            backdrop-filter: blur(10px); z-index: 2000; display: none;
+            justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content {
+            background: #141923; border: 2px solid var(--primary);
+            box-shadow: 0 0 30px var(--primary-glow); border-radius: 20px;
+            padding: 24px; max-width: 420px; width: 100%; max-height: 85vh; overflow-y: auto;
+        }
+        .modal-content h2 { color: var(--primary); text-align: center; margin-bottom: 12px; font-weight: 800; }
+        .modal-content h3 { color: var(--accent-cyan); font-size: 1rem; margin-top: 15px; margin-bottom: 6px; }
+        .modal-content p, .modal-content ul { font-size: 0.88rem; color: #a0aec0; line-height: 1.5; }
 
         #loading {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(255,255,255,0.85); display: none; 
-            justify-content: center; align-items: center; flex-direction: column;
-            font-size: 2rem; font-weight: bold; color: var(--primary); z-index: 1000;
+            position: fixed; inset:0; background: rgba(11,14,20,0.9);
+            display: none; justify-content: center; align-items: center;
+            flex-direction: column; font-size: 1.5rem; font-weight: 800; color: var(--primary); z-index: 3000;
         }
-        #loading-text { margin-bottom: 10px; }
-        #loading-sub { font-size: 1rem; color: #666; font-weight: normal; }
 
-        /* --- BOTÓN DE SOLUCIÓN Y MODALES --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 10px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 3px solid var(--primary); }
-        .modal-content h2 { margin-top: 0; color: var(--primary); text-align: center; font-weight: 800; letter-spacing: 1px;}
-        .modal-content h3 { color: var(--primary); margin-bottom: 5px; text-align: left; font-size: 1.2rem; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: 700; margin-top: 20px;}
-        .modal-content p, .modal-content ul { font-size: 1rem; line-height: 1.5; margin-top: 5px; color: #333; }
-        .modal-content ul { padding-left: 20px; }
-
+        /* --- BOTÓN FLOTANTE PISTA CYBER --- */
         .btn-solution {
-            position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px;
-            border-radius: 50%; background-color: var(--primary); color: white; border: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4); cursor: pointer; z-index: 1000;
-            display: flex; justify-content: center; align-items: center;
-            transition: transform 0.2s, background-color 0.5s ease;
-            font-family: 'SUSE', sans-serif;
+            position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
+            border-radius: 50%; background: var(--accent-cyan); color: #0b0e14; border: none;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5), 0 6px 12px rgba(0,0,0,0.5);
+            cursor: pointer; z-index: 500; display: flex; justify-content: center; align-items: center;
+            transition: transform 0.2s, background-color 0.3s;
         }
-        .btn-solution:hover { transform: scale(1.1); background-color: var(--primary-hover); }
-        
-        #solution-step-text { display: none; font-size: 1.8rem; font-weight: 800; line-height: 1; margin-top: 2px;}
+        .btn-solution:hover { transform: scale(1.1); }
+        #solution-step-text { display: none; font-size: 1.8rem; font-weight: 800; margin-top: -2px;}
 
-        /* --- DISEÑO MÓVIL --- */
+        /* MINIATURAS MANUALES */
+        .mini-icons-container { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
+        .piece-wrapper { position: relative; width: 38px; height: 38px; cursor: pointer; }
+        .badge {
+            position: absolute; top: -4px; right: -4px; background: var(--primary);
+            color: #fff; font-size: 0.65rem; font-weight: 800; padding: 1px 5px; border-radius: 50%; display: none;
+        }
+        .show-badge .badge { display: block; }
+        .diff-controls { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 8px; }
+        .diff-controls button { width: auto; padding: 4px 12px; font-size: 1rem; }
+
+        /* DISEÑO RESPONSIVO MÓVIL */
         @media (max-width: 900px) {
-            .layout {
-                display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
-                grid-template-areas: 
-                    "mode mode stats stats stats stats" 
-                    "main main main main main main" 
-                    "target target target ctrls ctrls ctrls" 
-                    "actions actions actions actions actions actions" 
-                    "config config config config config config" 
-                    "history history history history history history"; 
-                padding-bottom: 20px;
-            }
-            .col-left, .col-center, .col-right { display: contents; }
-            .box-stats { grid-area: stats; margin-bottom: 0; padding: 8px 4px; }
-            .box-main { grid-area: main; justify-self: center; width: 100%; max-width: 450px; }
-            .box-target { grid-area: target; justify-self: center; align-self: center; width: 100%; }
-            .box-ctrls { grid-area: ctrls; align-self: center; width: 100%; }
-            .box-actions { grid-area: actions; display: flex; gap: 10px; margin-top: 0; }
-            .box-config { grid-area: config; }
-            .box-history { grid-area: history; }
-            .box-mode { grid-area: mode; margin-bottom: 0; align-self: stretch; }
-            .btn-mode { margin-top: 0; height: 100%; font-size: 0.8rem; padding: 4px; display: flex; align-items: center; justify-content: center; line-height: 1.1; }
-            .btn-start { margin-top: 0; }
-            .board { width: 100%; height: auto; aspect-ratio: 1/1; border-width: 4px; }
-            .board.mini { width: 100%; max-width: 250px; height: auto; aspect-ratio: 1/1; border-width: 3px; margin-bottom: 0; }
-            .box-target h3 { display: none; }
-            .stat-group { padding: 0; }
-            .stat-line { font-size: 0.65rem; margin: 0 0 2px 0; letter-spacing: 0; }
-            .stat-value { font-size: 1.2rem; margin: 0; }
-            .controls-grid { gap: 6px; }
-            .controls-grid button { padding: 12px 2px; font-size: 0.85rem; }
-            .btn-undo { padding: 10px; font-size: 0.95rem; }
-            .btn-solution { bottom: 15px; right: 15px; width: 50px; height: 50px; }
-            .btn-solution svg { width: 20px; height: 20px; }
-            #solution-step-text { font-size: 1.5rem; }
+            .layout { flex-direction: column; align-items: center; gap: 15px; }
+            .col-left, .col-center, .col-right { width: 100%; max-width: 450px; }
+            .board { width: 100%; height: auto; aspect-ratio: 1/1; }
+            .board.mini { width: 180px; height: 180px; }
         }
     </style>
 </head>
-<body>
+<body class="theme-red">
 
     <div id="loading">
-        <div id="loading-text">Calculando Nivel...</div>
-        <div id="loading-sub">Buscando puzle perfecto</div>
+        <div id="loading-text" style="text-shadow: 0 0 10px var(--primary-glow);">CALCULANDO NIVEL...</div>
+        <div id="loading-sub" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400; margin-top: 5px;">Optimizando puzle...</div>
     </div>
 
-    <!-- BOTÓN DE SOLUCIÓN FLOTANTE INTERACTIVO -->
+    <!-- BOTÓN PISTA FLOTANTE INTERACTIVO -->
     <button class="btn-solution" id="btn-solution" onclick="nextSolutionStep()" title="Ver Solución">
-        <svg id="icon-question" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+        <svg id="icon-question" xmlns="http://www.w3.org/2000/svg" width="28" height="26" fill="currentColor" viewBox="0 0 16 16">
             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
             <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
         </svg>
         <span id="solution-step-text">1</span>
     </button>
 
+    <!-- ARQUITECTURA ESTRUCTURAL DE 3 COLUMNAS DE DRACT 3 -->
     <div class="layout">
+        
         <!-- COLUMNA IZQUIERDA -->
         <div class="col-left">
             <div class="box-mode">
-                <button class="btn-mode" id="btn-mode-toggle" onclick="toggleMode()">MODO CLÁSICO</button>
+                <button class="btn-action" style="color: var(--primary); border: 1px solid var(--surface-border);" id="btn-mode-toggle" onclick="toggleMode()">MODO CLÁSICO</button>
             </div>
             
             <div class="box-history history-container">
@@ -310,20 +291,20 @@
                                 <th>Pts.</th>
                             </tr>
                         </thead>
-                        <tbody id="history-body">
-                        </tbody>
+                        <tbody id="history-body"></tbody>
                     </table>
                 </div>
             </div>
             
-            <div class="box-actions">
+            <div class="box-actions" style="display: flex; flex-direction: column; gap: 8px;">
                 <button class="btn-action" onclick="resetPhase()">⟲ Reiniciar Fase</button>
                 <button class="btn-start" onclick="restartGame()">Empezar de Cero</button>
             </div>
         </div>
 
-        <!-- COLUMNA CENTRAL -->
+        <!-- COLUMNA CENTRAL (PROTAGONISTA) -->
         <div class="col-center">
+            <!-- MARCADO HUD DE ESTADÍSTICAS -->
             <div class="box-stats panel-box">
                 <div class="stats-inner">
                     <div class="stat-group">
@@ -335,147 +316,117 @@
                         <div class="stat-value" id="obj-lbl">0</div>
                     </div>
                     <div class="stat-group">
-                        <div class="stat-line">Mov.</div>
+                        <div class="stat-line">Movs.</div>
                         <div class="stat-value" id="mov-lbl">0</div>
                     </div>
                     <div class="stat-group">
-                        <div class="stat-line">Puntos</div>
-                        <div class="stat-value" id="score-lbl" style="color: #27ae60;">0</div>
+                        <div class="stat-line" style="color: var(--accent-green);">Puntos</div>
+                        <div class="stat-value" id="score-lbl" style="color: var(--accent-green); text-shadow: 0 0 8px rgba(0,230,118,0.4);">0</div>
                     </div>
                 </div>
             </div>
 
-            <div class="box-main" style="width: 100%; max-width: 450px; display: flex; justify-content: center;">
-                <div style="position: relative; width: 100%; aspect-ratio: 1/1;">
-                    <div id="main-board" class="board"></div>
-                </div>
+            <!-- TABLERO PRINCIPAL (450px) -->
+            <div style="position: relative; width: 100%; max-width: 450px; aspect-ratio: 1/1;">
+                <div id="main-board" class="board"></div>
             </div>
             
-            <div class="box-ctrls">
-                <div class="controls-grid">
-                    <button class="btn-blue" onclick="actionTransform('rotCW')" id="btn-rotcw">↻ +90°</button>
-                    <button class="btn-blue" onclick="actionTransform('rotCCW')" id="btn-rotccw">↺ -90°</button>
-                    <button class="btn-blue" onclick="actionTransform('flipH')" id="btn-fliph">↔ Sim H.</button>
-                    <button class="btn-blue" onclick="actionTransform('flipV')" id="btn-flipv">↕ Sim V.</button>
-                    <button class="btn-undo" onclick="undoMove()">↩ Deshacer Movimiento</button>
-                </div>
+            <!-- BOTONERA DE CONTROL SECUNDARIA Y PEQUEÑA -->
+            <div class="controls-grid">
+                <button class="btn-blue" onclick="actionTransform('rotCW')" id="btn-rotcw">↻ +90°</button>
+                <button class="btn-blue" onclick="actionTransform('rotCCW')" id="btn-rotccw">↺ -90°</button>
+                <button class="btn-blue" onclick="actionTransform('flipH')" id="btn-fliph">↔ Sim H.</button>
+                <button class="btn-blue" onclick="actionTransform('flipV')" id="btn-flipv">↕ Sim V.</button>
+                <button class="btn-undo" onclick="undoMove()">↩ Deshacer Movimiento</button>
             </div>
         </div>
 
         <!-- COLUMNA DERECHA -->
         <div class="col-right">
-            <div class="box-target">
+            <!-- TABLERO OBJETIVO GIGANTE "A CONSEGUIR" (220px) -->
+            <div class="panel-box" style="display: flex; flex-direction: column; align-items: center;">
                 <h3>A conseguir</h3>
                 <div id="target-board" class="board mini"></div>
             </div>
 
-            <div class="box-config panel-box">
-                <!-- Panel Auto -->
-                <div id="auto-config-view" style="display: none;">
-                    <div class="progression-text" id="prog-text">Progreso:</div>
-                    <div class="streak-dots">
+            <!-- PANEL DE CONFIGURACIÓN -->
+            <div class="panel-box">
+                <!-- Modo Clásico -->
+                <div id="classic-config-view" style="display: block; text-align: center;">
+                    <div id="classic-title" style="font-weight: 800; color: var(--primary); font-size: 0.9rem;">DRACT (Clásico)</div>
+                    <div style="margin: 8px 0; display: flex; justify-content: center; gap: 8px;">
+                        <button class="btn-blue" id="btn-classic-3" style="padding: 6px 16px; border-radius: 6px; font-size: 0.8rem;" onclick="setClassicSize(3)">3x3</button>
+                        <button class="btn-blue" id="btn-classic-4" style="padding: 6px 16px; border-radius: 6px; font-size: 0.8rem;" onclick="setClassicSize(4)">4x4</button>
+                    </div>
+                    <div id="classic-desc" style="font-size:0.75rem; color: var(--text-muted);">Tablero 4x4 limpio. Kamikaze Negro Activo.<br>Objetivos entre 4 y 7 movimientos.</div>
+                </div>
+
+                <!-- Modo Juego -->
+                <div id="auto-config-view" style="display: none; text-align: center;">
+                    <div class="progression-text" id="prog-text" style="font-size: 0.85rem; font-weight: 700;">Progreso:</div>
+                    <div class="streak-dots" style="margin: 6px 0;">
                         <div class="dot" id="dot-1"></div>
                         <div class="dot" id="dot-2"></div>
                     </div>
-                    <div style="font-size:0.8rem; color:#666; text-align:center;">Supera el Objetivo exacto para avanzar.</div>
+                    <div style="font-size:0.75rem; color: var(--text-muted);">Supera el Objetivo exacto para avanzar.</div>
                 </div>
 
-                <!-- Panel Manual -->
-                <div id="manual-config-view" style="display: none;">
-                    <div><strong>Ajustar Objetivo:</strong></div>
+                <!-- Modo Manual -->
+                <div id="manual-config-view" style="display: none; text-align: center;">
+                    <div style="font-size: 0.85rem; font-weight: 700;">Ajustar Objetivo:</div>
                     <div class="diff-controls">
                         <button class="btn-blue" onclick="changeMinMoves(-1)">-</button>
-                        <span id="min-moves-display" style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">6</span>
+                        <span id="min-moves-display" style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">6</span>
                         <button class="btn-blue" onclick="changeMinMoves(1)">+</button>
                     </div>
-                    <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; text-align: left; font-size: 0.9rem;">
-                        <label style="cursor: pointer;"><input type="checkbox" id="chk-4x4" onchange="toggleManualRule('4x4')"> Tablero 4x4</label>
-                        <label style="cursor: pointer;"><input type="checkbox" id="chk-rot" onchange="toggleManualRule('rot')"> Giros</label>
-                        <label style="cursor: pointer;"><input type="checkbox" id="chk-sym" onchange="toggleManualRule('sym')"> Simetrías</label>
-                        <label style="cursor: pointer;"><input type="checkbox" id="chk-obs" onchange="toggleManualRule('obs')"> Añadir Obstáculos</label>
-                        <label style="cursor: pointer;"><input type="checkbox" id="chk-blk" onchange="toggleManualRule('blk')"> Kamikaze Negro</label>
+                    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 0.78rem; color: var(--text-muted);">
+                        <label><input type="checkbox" id="chk-4x4" onchange="toggleManualRule('4x4')"> 4x4</label>
+                        <label><input type="checkbox" id="chk-rot" onchange="toggleManualRule('rot')"> Giros</label>
+                        <label><input type="checkbox" id="chk-sym" onchange="toggleManualRule('sym')"> Simetrías</label>
+                        <label><input type="checkbox" id="chk-obs" onchange="toggleManualRule('obs')"> Obstáculos</label>
+                        <label><input type="checkbox" id="chk-blk" onchange="toggleManualRule('blk')"> Kamikaze</label>
                     </div>
-                    
-                    <div style="margin-top: 15px;"><strong>Piezas (Doble Clic = x2):</strong></div>
                     <div class="mini-icons-container">
-                        <div class="piece-wrapper" onclick="toggleManualPiece(1)">
-                            <div id="icon-1" class="piece p-1 active-icon"></div><span class="badge">2</span>
-                        </div>
-                        <div class="piece-wrapper" onclick="toggleManualPiece(2)">
-                            <div id="icon-2" class="piece p-2 inactive-icon"></div><span class="badge">2</span>
-                        </div>
-                        <div class="piece-wrapper" onclick="toggleManualPiece(3)">
-                            <div id="icon-3" class="piece p-3 inactive-icon"></div><span class="badge">2</span>
-                        </div>
-                        <div class="piece-wrapper" onclick="toggleManualPiece(4)">
-                            <div id="icon-4" class="piece p-4 inactive-icon"></div><span class="badge">2</span>
-                        </div>
-                        <div class="piece-wrapper" onclick="toggleManualPiece(5)">
-                            <div id="icon-5" class="piece p-5 inactive-icon"></div><span class="badge">2</span>
-                        </div>
+                        <div class="piece-wrapper" onclick="toggleManualPiece(1)"><div id="icon-1" class="piece p-1 active-icon"></div><span class="badge">2</span></div>
+                        <div class="piece-wrapper" onclick="toggleManualPiece(2)"><div id="icon-2" class="piece p-2 inactive-icon"></div><span class="badge">2</span></div>
+                        <div class="piece-wrapper" onclick="toggleManualPiece(3)"><div id="icon-3" class="piece p-3 inactive-icon"></div><span class="badge">2</span></div>
+                        <div class="piece-wrapper" onclick="toggleManualPiece(4)"><div id="icon-4" class="piece p-4 inactive-icon"></div><span class="badge">2</span></div>
+                        <div class="piece-wrapper" onclick="toggleManualPiece(5)"><div id="icon-5" class="piece p-5 inactive-icon"></div><span class="badge">2</span></div>
                     </div>
-                    
-                    <button class="btn-action" style="margin-top:15px; margin-bottom:0;" onclick="forceRecalculate()">Generar otro Puzle</button>
-                </div>
-                
-                <!-- Panel Clásico -->
-                <div id="classic-config-view" style="display: block; text-align: center;">
-                    <div class="progression-text" id="classic-title" style="color: var(--primary);">DRACT (Clásico)</div>
-                    <div style="margin: 10px 0; display: flex; justify-content: center; gap: 10px;">
-                        <button class="btn-blue" id="btn-classic-3" style="width: 80px; padding: 6px;" onclick="setClassicSize(3)">3x3</button>
-                        <button class="btn-blue" id="btn-classic-4" style="width: 80px; padding: 6px;" onclick="setClassicSize(4)">4x4</button>
-                    </div>
-                    <div id="classic-desc" style="font-size:0.85rem; color:#666;">Tablero 4x4 limpio. <br>Kamikaze Negro Activo.<br><br>Objetivos entre 4 y 7 movimientos.</div>
+                    <button class="btn-action" style="margin-top: 10px; width: 100%;" onclick="forceRecalculate()">Generar otro Puzle</button>
                 </div>
             </div>
+            
+            <button class="btn-action" style="margin-top: 10px;" onclick="openInstructions()">Instrucciones</button>
         </div>
-    </div>
 
-    <!-- BOTÓN INSTRUCCIONES MAIN -->
-    <div style="display: flex; justify-content: center; width: 100%; margin-top: 30px; margin-bottom: 20px;">
-        <button class="btn-action" style="width: fit-content; padding: 12px 40px; font-size: 1.1rem; border-radius: 30px;" onclick="openInstructions()">Ver Instrucciones</button>
     </div>
 
     <!-- MODAL DE INSTRUCCIONES -->
     <div id="instructions-modal" class="modal-overlay">
         <div class="modal-content">
-            <h2>Instrucciones de DRACT 4</h2>
-            <p><strong>Meta:</strong> Consigue que tu tablero principal sea exactamente igual que la imagen de muestra ("A conseguir").</p>
+            <h2>Instrucciones</h2>
+            <p><strong>Meta:</strong> Consigue que tu tablero principal sea exactamente igual que la imagen "A conseguir".</p>
 
-            <h3>Objetivo y Puntuación</h3>
-            <p>El valor <strong>Objetivo</strong> (en rojo) te indica el número mínimo de movimientos en los que se puede resolver la fase.</p>
+            <h3>Reglas de Puntuación</h3>
+            <p>El valor <strong>Objetivo</strong> te indica el número mínimo de movimientos para resolver la fase.</p>
             <ul>
-                <li>Si resuelves la fase en un número de movimientos <strong>igual o menor</strong> al Objetivo, sumas esos puntos.</li>
-                <li>Si logras resolverlo en <strong>menos</strong> movimientos de los que indica el Objetivo, ¡Obtendrás puntuación doble!</li>
-                <li>Si excedes el Objetivo, la penalización es 1 a 1: <strong>-1 punto por cada movimiento extra</strong>. En MODO JUEGO, si tu puntuación total baja de 0, ¡Pierdes la partida!</li>
+                <li>Si resuelves la fase en movimientos <strong>iguales o menores</strong> al Objetivo, sumas esos puntos.</li>
+                <li>Si logras resolverlo en <strong>menos</strong> movimientos, ¡Obtendrás puntuación doble!</li>
+                <li>Si excedes el Objetivo, la penalización es de <strong>-1 punto por cada movimiento extra</strong>.</li>
             </ul>
 
-            <h3>Movimientos, Transformaciones y Kamikaze Negro</h3>
-            <p>Las piezas se mueven <strong>igual que en el ajedrez tradicional</strong>. Toca una pieza y luego una casilla vacía para moverla. Tanto mover una pieza como usar los botones azules para girar/reflejar el tablero <strong>cuentan como 1 movimiento</strong>.</p>
-            <p><strong>Casillas con X:</strong> Son obstáculos infranqueables. Las piezas no pueden caer ahí ni atravesarlas (salvo el Caballo en su salto en L).</p>
-            <p><strong>El Kamikaze Negro:</strong> Es tuyo y lo mueves tú. Puede moverse por casillas vacías, pero si lo mueves a una casilla ocupada por una pieza blanca, el Kamikaze se come a la blanca y <strong>ambas desaparecen del tablero</strong>. Cuando aparece el Kamikaze Negro en tu tablero, en la imagen "A conseguir" verás que ha desaparecido junto con una pieza blanca.</p>
+            <h3>Kamikaze Negro</h3>
+            <p>Es tuyo y lo mueves tú. Si lo mueves sobre una pieza blanca, se la come y <strong>ambas desaparecen del tablero</strong>.</p>
 
-            <h3>Modo Clásico (Inicial)</h3>
-            <p>Elige entre la liga **DRACT 3 (3x3)** o la liga mayor **DRACT 4 (4x4)**. El Kamikaze Negro está activo de serie (sin obstáculos). El motor buscará aleatoriamente puzles adaptados a cada tablero. ¡Puro desafío mental!</p>
-
-            <h3>Modo Juego (Progresión)</h3>
-            <p>Empezarás en la liga 3x3 (Azul) solo con el Rey. Cada vez que logres <strong>2 aciertos consecutivos</strong>, desbloquearás nuevas mecánicas:<br>
-            <strong>Dama > Torre > Giros > Alfil > Caballo > Simetrías > Objetivo 7 > Obj. 8 > Obj. 9.</strong><br>
-            Al superar el Nivel 9, darás el salto a la <strong>Liga 4x4 (Rojo)</strong>, recibirás +30 puntos y te enfrentarás a la inclusión de obstáculos y el Kamikaze Negro progresivamente.</p>
-            
-            <button class="btn-blue" style="margin-top: 15px;" onclick="closeInstructions()">¡A jugar!</button>
+            <button class="btn-blue" style="margin-top: 20px; width: 100%; border-radius: 10px;" onclick="closeInstructions()">¡Entendido!</button>
         </div>
     </div>
 
     <script>
-        // === MOTOR MATEMÁTICO FLAT GRID POR CAPAS ===
-        // 0 = Vacío
-        // 1 = Rey, 2 = Dama, 3 = Torre, 4 = Alfil, 5 = Caballo (Blancas)
-        // 6 = Rey, 7 = Dama, 8 = Torre, 9 = Alfil, 10 = Caballo (Negras Kamikaze)
-        // 99 = Obstáculo (X)
-
+        // === MOTOR MATEMÁTICO DRACT 4 ===
         let gameMode = 'classic'; 
-        let classicSize = 4; // 3 o 4 para el Modo Clásico
+        let classicSize = 4;
         
         let startGrid = null;   
         let currentGrid = null; 
@@ -491,10 +442,7 @@
 
         let unlockStage = 0; 
         let consecutiveWins = 0;
-        let phaseStartTime = 0;
-        let phaseUndos = 0;
         
-        // Memoria de la solución interactiva
         let currentSolution = [];
         let isPlayingSolution = false;
         let solutionStepIndex = 0;
@@ -503,7 +451,6 @@
 
         const delay = ms => new Promise(res => setTimeout(res, ms));
 
-        // ESTADO MANUAL
         let m_counts = [1, 0, 0, 0, 0]; 
         let m_size = 3;
         let m_rot = false, m_sym = false, m_obs = false, m_blk = false;
@@ -535,15 +482,15 @@
             const desc = document.getElementById('classic-desc');
 
             if (classicSize === 3) {
-                if (btn3) { btn3.style.opacity = '1'; btn3.style.backgroundColor = 'var(--primary)'; }
-                if (btn4) { btn4.style.opacity = '0.4'; btn4.style.backgroundColor = '#666'; }
+                if (btn3) { btn3.style.opacity = '1'; btn3.style.background = 'var(--primary)'; btn3.style.boxShadow = '0 0 12px var(--primary-glow)';}
+                if (btn4) { btn4.style.opacity = '0.5'; btn4.style.background = '#252b3b'; btn4.style.boxShadow = 'none';}
                 if (title) title.innerText = "DRACT 3 (Clásico 3x3)";
-                if (desc) desc.innerHTML = "Tablero 3x3 limpio.<br>Kamikaze Negro Activo.<br><br>Objetivos entre 3 y 6 movimientos.";
+                if (desc) desc.innerHTML = "Tablero 3x3 limpio. Kamikaze Negro Activo.<br>Objetivos entre 3 y 6 movimientos.";
             } else {
-                if (btn3) { btn3.style.opacity = '0.4'; btn3.style.backgroundColor = '#666'; }
-                if (btn4) { btn4.style.opacity = '1'; btn4.style.backgroundColor = 'var(--primary)'; }
+                if (btn3) { btn3.style.opacity = '0.5'; btn3.style.background = '#252b3b'; btn3.style.boxShadow = 'none';}
+                if (btn4) { btn4.style.opacity = '1'; btn4.style.background = 'var(--primary)'; btn4.style.boxShadow = '0 0 12px var(--primary-glow)';}
                 if (title) title.innerText = "DRACT 4 (Clásico 4x4)";
-                if (desc) desc.innerHTML = "Tablero 4x4 limpio.<br>Kamikaze Negro Activo.<br><br>Objetivos entre 4 y 7 movimientos.";
+                if (desc) desc.innerHTML = "Tablero 4x4 limpio. Kamikaze Negro Activo.<br>Objetivos entre 4 y 7 movimientos.";
             }
         }
 
@@ -570,10 +517,7 @@
                             if (nx >= 0 && nx < sz && ny >= 0 && ny < sz) {
                                 let ni = ny * sz + nx;
                                 let target = g[ni];
-                                if (target === 99) {
-                                    if (type !== 5) break; 
-                                    else continue; 
-                                }
+                                if (target === 99) { if (type !== 5) break; else continue; }
                                 if (target !== 0 && target !== 99) {
                                     if (target >= 1 && target <= 5) return true; 
                                     break; 
@@ -609,9 +553,7 @@
                     toPlace.push(Math.floor(Math.random()*5)+6);
                 } else {
                     for(let i=0; i<5; i++) {
-                        for(let j=0; j<m_counts[i]; j++) {
-                            toPlace.push(i+1);
-                        }
+                        for(let j=0; j<m_counts[i]; j++) toPlace.push(i+1);
                     }
                     if (r.blk) toPlace.push(Math.floor(Math.random()*5)+6);
                 }
@@ -630,9 +572,7 @@
                 });
 
                 if (r.blk) {
-                    if (!hasImmediateCapture(grid, boardSize)) {
-                        validSetup = true;
-                    }
+                    if (!hasImmediateCapture(grid, boardSize)) validSetup = true;
                 } else {
                     validSetup = true;
                 }
@@ -647,38 +587,22 @@
 
         function applyRotCW(g, sz) {
             let ng = new Uint8Array(g.length);
-            for(let y=0; y<sz; y++) {
-                for(let x=0; x<sz; x++) {
-                    ng[x*sz + (sz-1-y)] = g[y*sz + x];
-                }
-            }
+            for(let y=0; y<sz; y++) for(let x=0; x<sz; x++) ng[x*sz + (sz-1-y)] = g[y*sz + x];
             return ng;
         }
         function applyRotCCW(g, sz) {
             let ng = new Uint8Array(g.length);
-            for(let y=0; y<sz; y++) {
-                for(let x=0; x<sz; x++) {
-                    ng[(sz-1-x)*sz + y] = g[y*sz + x];
-                }
-            }
+            for(let y=0; y<sz; y++) for(let x=0; x<sz; x++) ng[(sz-1-x)*sz + y] = g[y*sz + x];
             return ng;
         }
         function applyFlipH(g, sz) {
             let ng = new Uint8Array(g.length);
-            for(let y=0; y<sz; y++) {
-                for(let x=0; x<sz; x++) {
-                    ng[y*sz + (sz-1-x)] = g[y*sz + x];
-                }
-            }
+            for(let y=0; y<sz; y++) for(let x=0; x<sz; x++) ng[y*sz + (sz-1-x)] = g[y*sz + x];
             return ng;
         }
         function applyFlipV(g, sz) {
             let ng = new Uint8Array(g.length);
-            for(let y=0; y<sz; y++) {
-                for(let x=0; x<sz; x++) {
-                    ng[(sz-1-y)*sz + x] = g[y*sz + x];
-                }
-            }
+            for(let y=0; y<sz; y++) for(let x=0; x<sz; x++) ng[(sz-1-y)*sz + x] = g[y*sz + x];
             return ng;
         }
 
@@ -710,49 +634,35 @@
                         if (nx >= 0 && nx < sz && ny >= 0 && ny < sz) {
                             let ni = ny * sz + nx;
                             let target = g[ni];
-                            
-                            if (target === 99) {
-                                if (type !== 5) break; 
-                                else continue; 
-                            }
+                            if (target === 99) { if (type !== 5) break; else continue; }
                             
                             let ng = cloneGrid(g);
                             if (target !== 0 && target !== 99) {
                                 let targetIsBlack = target >= 6 && target <= 10;
                                 if (isBlack && !targetIsBlack) {
-                                    ng[i] = 0; 
-                                    ng[ni] = 0; 
+                                    ng[i] = 0; ng[ni] = 0; 
                                     moves.push({ grid: ng, type: 'capture', from: i, to: ni });
                                 }
                                 break; 
                             } else {
-                                ng[i] = 0;
-                                ng[ni] = p;
+                                ng[i] = 0; ng[ni] = p;
                                 moves.push({ grid: ng, type: 'move', from: i, to: ni });
                             }
                         } else break; 
                     }
                 }
             }
-            if (r.rot) { 
-                moves.push({ grid: applyRotCW(g, sz), type: 'rotCW' }); 
-                moves.push({ grid: applyRotCCW(g, sz), type: 'rotCCW' }); 
-            }
-            if (r.sym) { 
-                moves.push({ grid: applyFlipH(g, sz), type: 'flipH' }); 
-                moves.push({ grid: applyFlipV(g, sz), type: 'flipV' }); 
-            }
+            if (r.rot) { moves.push({ grid: applyRotCW(g, sz), type: 'rotCW' }); moves.push({ grid: applyRotCCW(g, sz), type: 'rotCCW' }); }
+            if (r.sym) { moves.push({ grid: applyFlipH(g, sz), type: 'flipH' }); moves.push({ grid: applyFlipV(g, sz), type: 'flipV' }); }
             return moves;
         }
 
         function calculateTargetState(start, targetDistLimit) {
             let r = getRules();
             const MAX_LAYER = 15000; 
-
             let queue = [{g: start, d: 0, path: []}];
             let visited = new Set();
             visited.add(serializeGrid(start));
-            
             let validTargets = [];
 
             let hasBlack = false;
@@ -782,18 +692,15 @@
                         }
                     }
                 }
-                
                 if (nextLayer.length > MAX_LAYER) {
                     nextLayer.sort(() => Math.random() - 0.5);
                     nextLayer = nextLayer.slice(0, MAX_LAYER);
                 }
-                
                 queue = nextLayer;
                 if (queue.length === 0) break; 
             }
             
             let finalDepthReached = queue.length > 0 ? targetDistLimit : 0; 
-            
             if (finalDepthReached === targetDistLimit) {
                 for (let c of queue) {
                     let isBlackDead = true;
@@ -802,9 +709,7 @@
                             if (c.g[i] >= 6 && c.g[i] <= 10) { isBlackDead = false; break; }
                         }
                     }
-                    if (isBlackDead && !baseFrames.has(serializeGrid(c.g))) {
-                        validTargets.push(c);
-                    }
+                    if (isBlackDead && !baseFrames.has(serializeGrid(c.g))) validTargets.push(c);
                 }
             }
 
@@ -816,14 +721,14 @@
             }
         }
 
-        // --- SISTEMA DE DIBUJO DE FLECHAS SVG DIRECTAS ---
+        // DIBUJO DE FLECHAS SVG CYBER RED
         function drawArrow(step, sz) {
             const content = document.getElementById('overlay-content');
             if (!content) return;
             content.innerHTML = '';
             
             const strokeWidth = 2; 
-            const color = "rgb(180,0,0)"; 
+            const color = "rgb(255,42,84)"; 
             const filter = 'filter="url(#arrow-shadow)"';
             
             if (step.type === 'move' || step.type === 'capture') {
@@ -833,10 +738,8 @@
                 let tx = (step.to % sz) * cellSize + (cellSize / 2);
                 let ty = Math.floor(step.to / sz) * cellSize + (cellSize / 2);
                 
-                let dx = tx - fx;
-                let dy = ty - fy;
+                let dx = tx - fx; let dy = ty - fy;
                 let len = Math.sqrt(dx*dx + dy*dy);
-                
                 if (len === 0) return;
 
                 let startCut = cellSize * 0.25;
@@ -847,8 +750,8 @@
                 let endX = tx - (dx / len) * endCut;
                 let endY = ty - (dy / len) * endCut;
 
-                let headLen = 4;
-                let headWidth = 3.5;
+                let headLen = 4.5;
+                let headWidth = 4;
 
                 let shaftX = endX - (dx / len) * headLen;
                 let shaftY = endY - (dy / len) * headLen;
@@ -867,7 +770,6 @@
                         <polygon points="${endX},${endY} ${wing1X},${wing1Y} ${wing2X},${wing2Y}" fill="${color}" />
                     </g>
                 `;
-                
             } else if (step.type === 'rotCW') {
                 content.innerHTML = `
                     <g ${filter}>
@@ -906,7 +808,6 @@
             if (content) content.innerHTML = '';
         }
 
-        // --- FUNCIONALIDAD BOTÓN SOLUCIÓN INTERACTIVO PASO A PASO ---
         async function nextSolutionStep() {
             if (isAnimatingStep) return;
             if (!currentSolution || currentSolution.length === 0) {
@@ -919,31 +820,26 @@
             const btnSolution = document.getElementById('btn-solution');
             const boardEl = document.getElementById('main-board');
 
-            // 1. SI YA COMPLETAMOS LA SOLUCIÓN Y EL BOTÓN ESTÁ EN GRIS:
             if (isPlayingSolution && solutionStepIndex >= currentSolution.length) {
                 exitSolutionMode();
                 return;
             }
 
-            // 2. INICIAR MODO SOLUCIÓN (Primer Clic en "?")
             if (!isPlayingSolution) {
                 isPlayingSolution = true;
                 originalGridBeforeSolution = cloneGrid(currentGrid); 
-                
                 boardEl.style.pointerEvents = 'none'; 
-                boardEl.classList.add('board-solution-locked'); // Pone el tablero gris
+                boardEl.classList.add('board-solution-locked');
                 
-                // Rebobinamos al inicio del puzzle para mostrar la solución
                 currentGrid = cloneGrid(startGrid);
                 renderGrid('main', currentGrid, null);
                 
                 btnIcon.style.display = 'none';
                 btnText.style.display = 'block';
-                btnSolution.style.backgroundColor = "";
+                btnSolution.style.backgroundColor = "var(--accent-cyan)";
                 solutionStepIndex = 0;
             }
 
-            // 3. EJECUTAR EL PASO ACTUAL
             isAnimatingStep = true;
             let step = currentSolution[solutionStepIndex];
 
@@ -952,7 +848,6 @@
             if (step.type === 'move' || step.type === 'capture') {
                 let cellFrom = document.getElementById(`main-cell-${step.from}`);
                 if (cellFrom && cellFrom.firstChild) cellFrom.firstChild.style.animation = "blink-anim 0.4s ease-in-out infinite";
-                
                 await delay(750); 
                 
                 let tempGrid = step.grid;
@@ -962,35 +857,26 @@
                 if (step.type === 'move') {
                     if (cellTo && cellTo.firstChild) cellTo.firstChild.style.animation = "blink-anim 0.4s ease-in-out infinite";
                 } else {
-                    if (cellTo) cellTo.style.backgroundColor = "rgba(192, 57, 43, 0.5)";
+                    if (cellTo) cellTo.style.backgroundColor = "rgba(255, 42, 84, 0.4)";
                 }
-                
                 await delay(750); 
-                
                 if (cellTo && cellTo.firstChild) cellTo.firstChild.style.animation = "";
                 if (cellTo) cellTo.style.backgroundColor = "";
             } else if (step.type.startsWith('rot') || step.type.startsWith('flip')) {
                 boardEl.classList.add('board-blinking');
-                
                 await delay(750);
-                
                 let tempGrid = step.grid;
                 renderGrid('main', tempGrid, null);
                 boardEl.classList.remove('board-blinking');
-                
                 await delay(750);
             }
 
             clearArrow();
-            solutionStepIndex++; // Incrementa el contador de pasos completados
+            solutionStepIndex++;
             
-            // 4. EL BOTÓN MUESTRA EL NÚMERO DEL PASO QUE SE ACABA DE COMPLETAR Y CAMBIA A GRIS SI HA TERMINADO
             btnText.innerText = solutionStepIndex; 
-
             if (solutionStepIndex >= currentSolution.length) {
-                btnSolution.style.backgroundColor = "#7f8c8d"; // Cambia el botón a GRIS al terminar
-            } else {
-                btnSolution.style.backgroundColor = ""; // Mantiene color del tema
+                btnSolution.style.backgroundColor = "#5a6578";
             }
 
             isAnimatingStep = false;
@@ -999,16 +885,14 @@
         function exitSolutionMode() {
             isPlayingSolution = false;
             solutionStepIndex = 0;
-            if (originalGridBeforeSolution) {
-                currentGrid = originalGridBeforeSolution; 
-            }
+            if (originalGridBeforeSolution) currentGrid = originalGridBeforeSolution; 
             
             let boardEl = document.getElementById('main-board');
-            boardEl.classList.remove('board-solution-locked'); // Quita el tablero gris
+            boardEl.classList.remove('board-solution-locked');
             boardEl.style.pointerEvents = 'auto'; 
             
             const btnSolution = document.getElementById('btn-solution');
-            if (btnSolution) btnSolution.style.backgroundColor = ""; // Devuelve el color original del tema
+            if (btnSolution) btnSolution.style.backgroundColor = "var(--accent-cyan)";
             
             clearArrow();
             renderAll(); 
@@ -1017,21 +901,20 @@
             document.getElementById('icon-question').style.display = 'block';
         }
 
-        // --- CONTROLADORES UI ---
         function toggleMode() {
             if (isPlayingSolution) exitSolutionMode();
             const btn = document.getElementById('btn-mode-toggle');
             if (gameMode === 'classic') {
                 gameMode = 'auto';
                 btn.innerText = "MODO JUEGO";
-                btn.style.backgroundColor = "#27ae60";
+                btn.style.color = "var(--accent-green)";
                 document.getElementById('auto-config-view').style.display = 'block';
                 document.getElementById('manual-config-view').style.display = 'none';
                 document.getElementById('classic-config-view').style.display = 'none';
             } else if (gameMode === 'auto') {
                 gameMode = 'manual';
                 btn.innerText = "MODO MANUAL";
-                btn.style.backgroundColor = "#8e44ad";
+                btn.style.color = "#9d00ff";
                 document.getElementById('auto-config-view').style.display = 'none';
                 document.getElementById('manual-config-view').style.display = 'block';
                 document.getElementById('classic-config-view').style.display = 'none';
@@ -1052,7 +935,7 @@
             } else {
                 gameMode = 'classic';
                 btn.innerText = "MODO CLÁSICO";
-                btn.style.backgroundColor = "var(--primary)";
+                btn.style.color = "var(--primary)";
                 document.getElementById('auto-config-view').style.display = 'none';
                 document.getElementById('manual-config-view').style.display = 'none';
                 document.getElementById('classic-config-view').style.display = 'block';
@@ -1062,29 +945,19 @@
 
         function toggleManualPiece(type) {
             if (gameMode !== 'manual' || isPlayingSolution) return;
-
             let current = m_counts[type - 1];
-
             if (type === 1 || type === 2) {
                 m_counts[type - 1] = current === 0 ? 1 : 0;
             } else {
                 let next = current + 1;
                 if (next > 2) next = 0;
-                
                 if (next === 2) {
-                    for (let i = 2; i < 5; i++) { 
-                        if (i !== (type - 1) && m_counts[i] === 2) m_counts[i] = 1;
-                    }
+                    for (let i = 2; i < 5; i++) if (i !== (type - 1) && m_counts[i] === 2) m_counts[i] = 1;
                 }
                 m_counts[type - 1] = next;
             }
-
             let total = m_counts.reduce((a,b)=>a+b, 0) + (m_blk ? 1 : 0);
-            if (total < 1) {
-                m_counts[type - 1] = current; 
-                return;
-            }
-
+            if (total < 1) { m_counts[type - 1] = current; return; }
             updateUnlockUI();
             forceRecalculate();
         }
@@ -1112,8 +985,13 @@
         function updateUnlockUI() {
             let r = getRules();
 
-            if (r.size === 4) document.body.classList.add('theme-red');
-            else document.body.classList.remove('theme-red');
+            if (r.size === 4) {
+                document.body.classList.add('theme-red');
+                document.body.classList.remove('theme-blue');
+            } else {
+                document.body.classList.add('theme-blue');
+                document.body.classList.remove('theme-red');
+            }
 
             document.documentElement.style.setProperty('--grid-size', r.size);
 
@@ -1152,7 +1030,6 @@
                     let wrapper = document.getElementById(`icon-${i+1}`).parentElement;
                     let icon = document.getElementById(`icon-${i+1}`);
                     let count = m_counts[i];
-                    
                     icon.className = `piece p-${i+1} ${count > 0 ? 'active-icon' : 'inactive-icon'}`;
                     if (count === 2) wrapper.classList.add('show-badge');
                     else wrapper.classList.remove('show-badge');
@@ -1162,7 +1039,6 @@
             }
         }
 
-        // --- SISTEMA DE DIBUJADO DE TABLEROS ---
         function createBoards() {
             let s = boardSize;
             const mb = document.getElementById('main-board');
@@ -1193,7 +1069,7 @@
             overlay.innerHTML = `
                 <defs>
                     <filter id="arrow-shadow" x="-30%" y="-30%" width="160%" height="160%">
-                        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.8"/>
+                        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.9"/>
                     </filter>
                 </defs>
                 <g id="overlay-content"></g>
@@ -1203,12 +1079,11 @@
 
         function renderAll() {
             updateUnlockUI();
-            
             document.getElementById('lvl-lbl').innerText = currentPhase;
             document.getElementById('obj-lbl').innerText = targetDist;
             const movLbl = document.getElementById('mov-lbl');
             movLbl.innerText = movesCount;
-            movLbl.style.color = (movesCount > targetDist) ? "#d32f2f" : "var(--primary)";
+            movLbl.style.color = (movesCount > targetDist) ? "#ff2a54" : "var(--primary)";
             
             renderGrid('main', currentGrid, selectedIdx);
             renderGrid('target', targetGrid, null);
@@ -1251,28 +1126,21 @@
 
             if (selectedIdx !== null) {
                 if (selectedIdx === idx) { selectedIdx = null; renderAll(); return; }
-                
                 let p = currentGrid[selectedIdx];
                 let isBlack = p >= 6 && p <= 10;
 
                 if (val !== 0 && val !== 99) {
                     let targetIsBlack = val >= 6 && val <= 10;
-                    if (isBlack === targetIsBlack) {
-                        selectedIdx = idx; renderAll(); return;
-                    }
+                    if (isBlack === targetIsBlack) { selectedIdx = idx; renderAll(); return; }
                 }
 
                 let mockMoves = getValidMoves(currentGrid, {rot:false, sym:false, size: boardSize});
                 let validState = null;
-                
                 for(let mObj of mockMoves) {
                     let m = mObj.grid;
                     if (m[selectedIdx] === 0) {
-                        if (isBlack && val !== 0 && val !== 99) { 
-                            if (m[idx] === 0) { validState = m; break; }
-                        } else { 
-                            if (m[idx] === p) { validState = m; break; }
-                        }
+                        if (isBlack && val !== 0 && val !== 99) { if (m[idx] === 0) { validState = m; break; } }
+                        else { if (m[idx] === p) { validState = m; break; } }
                     }
                 }
 
@@ -1293,7 +1161,6 @@
             let last = historyStates.pop();
             currentGrid = last.g;
             movesCount = last.moves;
-            phaseUndos++;
             selectedIdx = null;
             renderAll();
         }
@@ -1305,7 +1172,6 @@
             if (type.startsWith('flip') && !r.sym) return;
             
             historyStates.push({ g: cloneGrid(currentGrid), moves: movesCount });
-            
             if (type === 'rotCW') currentGrid = applyRotCW(currentGrid, r.size);
             if (type === 'rotCCW') currentGrid = applyRotCCW(currentGrid, r.size);
             if (type === 'flipH') currentGrid = applyFlipH(currentGrid, r.size);
@@ -1324,32 +1190,26 @@
                     let winObj = movesCount <= targetDist;
                     
                     let phaseScore;
-                    if (beatObj) {
-                        phaseScore = targetDist * 2;
-                    } else if (winObj) {
-                        phaseScore = targetDist;
-                    } else {
-                        phaseScore = -(movesCount - targetDist);
-                    }
+                    if (beatObj) phaseScore = targetDist * 2;
+                    else if (winObj) phaseScore = targetDist;
+                    else phaseScore = -(movesCount - targetDist);
+                    
                     totalScore += phaseScore;
                     
                     const tbody = document.getElementById('history-body');
                     const tr = document.createElement('tr');
-                    let cInt = movesCount > targetDist ? '#d32f2f' : (beatObj ? '#8e44ad' : 'var(--primary)');
-                    let cSc = phaseScore < 0 ? '#d32f2f' : (beatObj ? '#8e44ad' : '#27ae60');
+                    let cInt = movesCount > targetDist ? '#ff2a54' : (beatObj ? '#8e44ad' : 'var(--primary)');
+                    let cSc = phaseScore < 0 ? '#ff2a54' : (beatObj ? '#8e44ad' : 'var(--accent-green)');
                     tr.innerHTML = `<td><strong>${currentPhase}</strong></td><td>${targetDist}</td><td style="color:${cInt}; font-weight:bold;">${movesCount}</td><td style="color:${cSc}; font-weight:bold;">${phaseScore}</td>`;
                     tbody.prepend(tr);
                     
                     document.getElementById('score-lbl').innerText = totalScore;
-                    document.getElementById('score-lbl').style.color = totalScore < 0 ? '#d32f2f' : '#27ae60';
+                    document.getElementById('score-lbl').style.color = totalScore < 0 ? '#ff2a54' : 'var(--accent-green)';
 
-                    if (beatObj) {
-                        alert(`¡ENHORABUENA!\nHas resuelto la fase en menos movimientos que el objetivo.\n¡Puntuación de fase duplicada (+${phaseScore} Pts)!`);
-                    }
+                    if (beatObj) alert(`¡ENHORABUENA!\n¡Puntuación duplicada (+${phaseScore} Pts)!`);
 
                     if (gameMode === 'auto' && totalScore < 0) {
-                        let levelMsg = document.getElementById('prog-text').innerText.replace(":", "");
-                        alert(`¡JUEGO TERMINADO!\nTu puntuación ha caído por debajo de cero.\nHas superado hasta la Fase ${currentPhase - 1} y llegado al Nivel:\n[ ${levelMsg} ]\n¡Buen intento!`);
+                        alert(`¡JUEGO TERMINADO!\nTu puntuación ha caído por debajo de cero.`);
                         restartGame();
                         return;
                     }
@@ -1364,18 +1224,15 @@
                                     if (unlockStage === 10) {
                                         totalScore += 30;
                                         document.getElementById('score-lbl').innerText = totalScore;
-                                        alert("¡NIVEL SUPERIOR DESBLOQUEADO!\nHas entrado en la Liga 4x4 (Rojo).\n+30 Puntos Extra.");
+                                        alert("¡NIVEL SUPERIOR DESBLOQUEADO!\nLiga 4x4 (+30 Pts Extra).");
                                     }
                                 }
                             }
-                        } else {
-                            consecutiveWins = 0;
-                        }
+                        } else consecutiveWins = 0;
                     }
                     
                     currentPhase++;
                     movesCount = 0;
-                    phaseUndos = 0;
                     historyStates = [];
                     
                     startGrid = generateInitialSetup();
@@ -1386,10 +1243,8 @@
             }
         }
 
-        // GENERACIÓN ASÍNCRONA Y ASIGNACIÓN DE SOLUCIÓN
         function generateTarget() {
             document.getElementById('loading').style.display = 'flex';
-            
             let attempts = 0;
             let currentSearchDist = 6;
             
@@ -1405,39 +1260,24 @@
             function tryGen() {
                 attempts++;
                 let res = calculateTargetState(startGrid, currentSearchDist);
-                
                 if (res.g !== null) {
-                    targetGrid = res.g;
-                    targetDist = res.d; 
-                    currentSolution = res.path; 
-                    if (gameMode === 'manual') {
-                        m_dist = targetDist;
-                        document.getElementById('min-moves-display').innerText = m_dist;
-                    }
-                    phaseStartTime = Date.now();
+                    targetGrid = res.g; targetDist = res.d; currentSolution = res.path; 
+                    if (gameMode === 'manual') { m_dist = targetDist; document.getElementById('min-moves-display').innerText = m_dist; }
                     renderAll();
                     document.getElementById('loading').style.display = 'none';
                 } else {
-                    if (attempts > 15 && currentSearchDist > 1) {
-                        currentSearchDist--; 
-                        attempts = 0; 
-                        document.getElementById('loading-sub').innerText = `Ajustando a ${currentSearchDist} movs...`;
-                    }
-                    startGrid = generateInitialSetup();
-                    currentGrid = cloneGrid(startGrid);
-                    createBoards();
+                    if (attempts > 15 && currentSearchDist > 1) { currentSearchDist--; attempts = 0; }
+                    startGrid = generateInitialSetup(); currentGrid = cloneGrid(startGrid); createBoards();
                     setTimeout(tryGen, 10);
                 }
             }
-
             setTimeout(tryGen, 50);
         }
 
         function changeMinMoves(delta) {
             if (gameMode !== 'manual' || isPlayingSolution) return;
             let n = m_dist + delta;
-            if (n < 1) n = 1; 
-            if (n > 10) n = 10; 
+            if (n < 1) n = 1; if (n > 10) n = 10; 
             m_dist = n;
             document.getElementById('min-moves-display').innerText = m_dist;
             forceRecalculate();
@@ -1445,87 +1285,43 @@
 
         function forceRecalculate() {
             if (isPlayingSolution) return;
-            movesCount = 0;
-            phaseUndos = 0;
-            historyStates = [];
-            
+            movesCount = 0; historyStates = [];
             document.getElementById('loading').style.display = 'flex';
             let currentSearchDist = m_dist;
-            document.getElementById('loading-sub').innerText = `Buscando a ${currentSearchDist} movs...`;
-            
             let attempts = 0;
             
             function tryRecalc() {
                 attempts++;
                 let tempStart = generateInitialSetup();
                 let res = calculateTargetState(tempStart, currentSearchDist);
-                
                 if (res.g !== null) {
-                    startGrid = tempStart;
-                    targetGrid = res.g;
-                    targetDist = res.d;
-                    currentSolution = res.path; 
-                    m_dist = targetDist; 
-                    document.getElementById('min-moves-display').innerText = m_dist;
-                    
-                    currentGrid = cloneGrid(startGrid);
-                    createBoards();
-                    phaseStartTime = Date.now();
-                    renderAll();
+                    startGrid = tempStart; targetGrid = res.g; targetDist = res.d; currentSolution = res.path; 
+                    m_dist = targetDist; document.getElementById('min-moves-display').innerText = m_dist;
+                    currentGrid = cloneGrid(startGrid); createBoards(); renderAll();
                     document.getElementById('loading').style.display = 'none';
                 } else {
-                    if (attempts > 15 && currentSearchDist > 1) {
-                        currentSearchDist--; 
-                        attempts = 0;
-                        document.getElementById('loading-sub').innerText = `Ajustando a ${currentSearchDist} movs...`;
-                    }
+                    if (attempts > 15 && currentSearchDist > 1) { currentSearchDist--; attempts = 0; }
                     setTimeout(tryRecalc, 10);
                 }
             }
-            
             setTimeout(tryRecalc, 50);
         }
 
         function resetPhase() {
             if (isPlayingSolution) { exitSolutionMode(); return; }
-            movesCount = 0;
-            phaseUndos = 0;
-            historyStates = [];
-            
-            if (gameMode === 'manual') {
-                forceRecalculate();
-            } else {
-                startGrid = generateInitialSetup();
-                currentGrid = cloneGrid(startGrid);
-                createBoards();
-                generateTarget();
-            }
+            movesCount = 0; historyStates = [];
+            if (gameMode === 'manual') forceRecalculate();
+            else { startGrid = generateInitialSetup(); currentGrid = cloneGrid(startGrid); createBoards(); generateTarget(); }
         }
 
         function restartGame() {
             if (isPlayingSolution) exitSolutionMode();
             document.getElementById('history-body').innerHTML = '';
-            currentPhase = 1;
-            movesCount = 0;
-            totalScore = 0;
-            unlockStage = 0;
-            consecutiveWins = 0;
-            phaseUndos = 0;
-            
+            currentPhase = 1; movesCount = 0; totalScore = 0; unlockStage = 0; consecutiveWins = 0;
             document.getElementById('score-lbl').innerText = totalScore;
-            document.getElementById('score-lbl').style.color = '#27ae60';
-            
-            selectedIdx = null;
-            historyStates = [];
-            
-            if (gameMode === 'manual') {
-                forceRecalculate();
-            } else {
-                startGrid = generateInitialSetup();
-                currentGrid = cloneGrid(startGrid);
-                createBoards();
-                generateTarget();
-            }
+            selectedIdx = null; historyStates = [];
+            if (gameMode === 'manual') forceRecalculate();
+            else { startGrid = generateInitialSetup(); currentGrid = cloneGrid(startGrid); createBoards(); generateTarget(); }
         }
 
         initGame();
