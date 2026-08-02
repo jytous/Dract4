@@ -168,46 +168,50 @@
             pointer-events: none;
         }
 
-        /* --- ZONA INFERIOR (COMPRIMIDA) --- */
+        /* --- ZONA INFERIOR 50/50 (OBJETIVO Y CONTROLES) --- */
         .bottom-area {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             width: 100%;
             align-items: stretch;
         }
 
-        /* OBJETIVO (IZQUIERDA) */
+        /* OBJETIVO (MITAD IZQUIERDA) */
         .target-wrapper {
-            flex: 0 0 120px;
+            flex: 1; /* Ocupa el 50% */
             background: rgba(0, 240, 255, 0.05);
             border: 1px solid rgba(0, 240, 255, 0.15);
             border-radius: 12px;
-            padding: 8px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 10px;
         }
 
         .target-title {
-            font-size: 0.7rem; font-weight: 800; color: var(--accent-cyan);
+            font-size: 0.8rem; font-weight: 800; color: var(--accent-cyan);
             text-transform: uppercase; letter-spacing: 1px;
             text-shadow: 0 0 8px var(--accent-cyan-glow); text-align: center;
         }
 
         .board.mini {
-            width: 100px; height: 100px;
+            width: 100%; 
+            max-width: 160px; /* Tamaño máximo para que no se deforme en tablets */
+            height: auto; 
+            aspect-ratio: 1/1;
             border: 2px solid var(--accent-cyan);
             border-radius: 8px;
             box-shadow: 0 0 10px var(--accent-cyan-glow), 0 4px 10px rgba(0,0,0,0.5);
         }
 
-        /* CONTROLES (DERECHA) */
+        /* CONTROLES (MITAD DERECHA) */
         .controls-wrapper {
-            flex: 1;
+            flex: 1; /* Ocupa el 50% */
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
             gap: 6px;
         }
 
@@ -217,47 +221,52 @@
             gap: 6px;
         }
 
+        /* Botones más estrechos pero más ALTOS */
         button.btn-blue {
             border: none; color: #fff; font-size: 0.75rem; font-weight: 800; font-family: 'SUSE', sans-serif;
-            border-radius: 8px; cursor: pointer; padding: 10px 4px;
+            border-radius: 8px; cursor: pointer; padding: 14px 4px;
             background: linear-gradient(180deg, var(--primary) 0%, #b8002a 100%);
             box-shadow: 0 3px 0 #700019, 0 0 10px var(--primary-glow);
             transition: all 0.1s ease;
+            display: flex; justify-content: center; align-items: center;
         }
         button.btn-blue:active { transform: translateY(2px); box-shadow: 0 1px 0 #700019; }
 
-        /* FILA DESHACER + TAMAÑOS */
-        .undo-row { display: flex; gap: 6px; width: 100%; }
+        /* FILA DESHACER (Ancho idéntico a Sim H) + TAMAÑOS CLÁSICOS */
+        .undo-row { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; 
+        }
         .btn-undo {
-            flex: 1; border: none; color: #d0d7de; font-size: 0.8rem; font-weight: 800; font-family: 'SUSE', sans-serif;
-            border-radius: 8px; cursor: pointer; padding: 8px;
+            width: 100%; border: none; color: #d0d7de; font-size: 0.75rem; font-weight: 800; font-family: 'SUSE', sans-serif;
+            border-radius: 8px; cursor: pointer; padding: 14px 4px;
             background: #1c2230; border: 1px solid rgba(255,255,255,0.08);
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+            display: flex; justify-content: center; align-items: center;
         }
         .btn-undo:active { background: #252d3d; }
         
-        .classic-sizes { display: flex; gap: 6px; }
+        .classic-sizes { display: flex; gap: 6px; width: 100%; }
         .size-btn {
-            width: 35px; padding: 0 !important; font-size: 0.7rem !important; border-radius: 6px !important;
+            flex: 1; height: 100%; padding: 0 !important; font-size: 0.75rem !important; border-radius: 6px !important;
             display: flex; justify-content: center; align-items: center;
         }
 
-        /* FILA REINICIAR */
+        /* FILA REINICIAR (Abajo del todo) */
         .action-row { display: flex; gap: 6px; width: 100%; }
         .btn-action {
             flex: 1; border: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; font-family: 'SUSE', sans-serif;
-            border-radius: 8px; cursor: pointer; padding: 8px;
-            background: #252b3b;
+            border-radius: 8px; cursor: pointer; padding: 14px 4px;
+            background: #252b3b; display: flex; justify-content: center; align-items: center;
         }
         .btn-action:active { background: #323a4d; color: #fff; }
 
-        /* PANELES PLEGABLES */
+        /* --- PANELES PLEGABLES PARA OTROS MODOS --- */
         .panel-box {
             background: var(--surface-dark); border: 1px solid var(--surface-border);
             border-radius: 12px; padding: 12px; width: 100%; margin-top: 5px;
         }
 
-        /* PIEZAS, OBSTÁCULOS Y SOLUCIÓN */
+        /* --- PIEZAS, OBSTÁCULOS Y SOLUCIÓN --- */
         .board-solution-locked {
             --dark-square: #2a303c !important; --light-square: #3a4354 !important;
             border-color: #5a6578 !important; box-shadow: 0 0 15px rgba(0,0,0,0.5) !important;
@@ -377,19 +386,19 @@
             <div id="main-board" class="board"></div>
         </div>
 
-        <!-- 3. ZONA INFERIOR COMPRIMIDA -->
+        <!-- 3. ZONA INFERIOR 50/50 -->
         <div class="bottom-area">
             
-            <!-- IZQUIERDA: TARGET BOARD -->
+            <!-- MITAD IZQUIERDA: TARGET BOARD GIGANTE -->
             <div class="target-wrapper">
                 <span class="target-title">A conseguir</span>
                 <div id="target-board" class="board mini"></div>
             </div>
 
-            <!-- DERECHA: BOTONES Y CONTROLES -->
+            <!-- MITAD DERECHA: BOTONES Y CONTROLES -->
             <div class="controls-wrapper">
                 
-                <!-- 2x2 Grid de Giros y Simetrías -->
+                <!-- Grid de Giros y Simetrías -->
                 <div class="controls-grid">
                     <button class="btn-blue" onclick="actionTransform('rotCW')" id="btn-rotcw">↻ +90°</button>
                     <button class="btn-blue" onclick="actionTransform('rotCCW')" id="btn-rotccw">↺ -90°</button>
@@ -431,9 +440,9 @@
             <div id="manual-config-view" style="display: none; text-align: center;">
                 <div class="diff-controls">
                     <span style="font-size: 0.8rem; font-weight: 700; margin-right: 10px;">Movimientos:</span>
-                    <button class="btn-blue" onclick="changeMinMoves(-1)">-</button>
+                    <button class="btn-blue" style="padding: 4px 14px;" onclick="changeMinMoves(-1)">-</button>
                     <span id="min-moves-display" style="font-size: 1.2rem; font-weight: 800; color: var(--primary); width: 25px;">6</span>
-                    <button class="btn-blue" onclick="changeMinMoves(1)">+</button>
+                    <button class="btn-blue" style="padding: 4px 14px;" onclick="changeMinMoves(1)">+</button>
                 </div>
                 <div style="margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 0.75rem; color: var(--text-muted);">
                     <label><input type="checkbox" id="chk-4x4" onchange="toggleManualRule('4x4')"> 4x4</label>
@@ -614,7 +623,6 @@
                         toPlace = [1, 2, 3, 4, 5];
                         toPlace.push(Math.floor(Math.random()*5)+6);
                     } else {
-                        // 3x3 Classic: Rey + 2 Blancas random + 1 Kamikaze (para evitar que se bloquee el generador)
                         toPlace = [1];
                         let pool = [2, 3, 4, 5];
                         pool.sort(() => Math.random() - 0.5);
@@ -729,7 +737,7 @@
 
         function calculateTargetState(start, targetDistLimit) {
             let r = getRules();
-            const MAX_LAYER = 4000; // Reducido para evitar bloqueos
+            const MAX_LAYER = 4000; 
             let queue = [{g: start, d: 0, path: []}];
             let visited = new Set();
             visited.add(serializeGrid(start));
@@ -791,6 +799,7 @@
             }
         }
 
+        // DIBUJO DE FLECHAS SVG CYBER RED
         function drawArrow(step, sz) {
             const content = document.getElementById('overlay-content');
             if (!content) return;
