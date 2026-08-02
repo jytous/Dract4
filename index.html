@@ -224,7 +224,7 @@
             gap: 6px;
         }
 
-        /* Botones táctiles 3D dinámicos a la Liga */
+        /* BOTONES DE ACCIÓN PRINCIPALES (Rotar, Girar) */
         button.btn-blue {
             border: none; color: #fff; font-size: 0.75rem; font-weight: 800; font-family: 'SUSE', sans-serif;
             border-radius: 8px; cursor: pointer; padding: 14px 4px;
@@ -234,52 +234,29 @@
             display: flex; justify-content: center; align-items: center;
         }
         button.btn-blue:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-shadow); }
+        button.btn-blue:disabled { background: #252b3b; color: #5a6578; box-shadow: none; cursor: not-allowed; opacity: 0.2; }
 
-        /* Botones desactivados (Giros y simetrías cuando no aplican) */
-        button.btn-blue:disabled {
-            background: #252b3b;
-            color: #5a6578;
-            box-shadow: none;
-            cursor: not-allowed;
-            opacity: 0.2;
-        }
-
-        /* Clases para botones de tamaño inactivos */
-        .inactive-size {
-            opacity: 0.2 !important;
-            background: #252b3b !important;
-            box-shadow: 0 3px 0 #161b26 !important;
-        }
-        .inactive-size:active {
-            transform: translateY(2px) !important;
-            box-shadow: 0 1px 0 #161b26 !important;
-        }
-
-        /* FILA DESHACER + TAMAÑOS CLÁSICOS */
-        .undo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
-        .btn-undo {
+        /* ESTÉTICA OSCURA UNIFICADA (Deshacer, 3x3, 4x4, Fase, Todo, Configs) */
+        .btn-dark {
             width: 100%; border: none; color: #d0d7de; font-size: 0.75rem; font-weight: 800; font-family: 'SUSE', sans-serif;
             border-radius: 8px; cursor: pointer; padding: 14px 4px;
             background: #1c2230; border: 1px solid rgba(255,255,255,0.08);
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
             display: flex; justify-content: center; align-items: center;
+            transition: all 0.1s ease;
         }
-        .btn-undo:active { background: #252d3d; }
+        .btn-dark:active:not(.inactive-size) { background: #252d3d; color: #fff; }
         
-        .classic-sizes { display: flex; gap: 6px; width: 100%; }
-        .size-btn {
-            flex: 1; height: 100%; padding: 0 !important; font-size: 0.75rem !important; border-radius: 6px !important;
-            display: flex; justify-content: center; align-items: center;
+        /* Opacidad 20% para tamaños no seleccionados */
+        .inactive-size {
+            opacity: 0.2 !important;
+            cursor: pointer;
         }
 
-        /* FILA REINICIAR */
-        .action-row { display: flex; gap: 6px; width: 100%; }
-        .btn-action {
-            flex: 1; border: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; font-family: 'SUSE', sans-serif;
-            border-radius: 8px; cursor: pointer; padding: 14px 4px;
-            background: #252b3b; display: flex; justify-content: center; align-items: center;
+        /* FILAS ESTRUCTURALES UNIFICADAS (Grid perfecto) */
+        .undo-row, .action-row, .classic-sizes { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; 
         }
-        .btn-action:active { background: #323a4d; color: #fff; }
 
         /* PANELES PLEGABLES */
         .panel-box {
@@ -306,7 +283,6 @@
         .p-4 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 51 51'%3E%3Cpath d='M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2zM15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z' fill='%23fff' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E"); }
         .p-5 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 49 49'%3E%3Cpath d='M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18' fill='%23fff' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26.5 C 6,24 10,23 11,24 C 11,24 11,22 10,21 C 10,21 11,20.12 11,20 C 11,20 10.09,19 11,18 C 11,18 10,17 11,16 C 11,16 11,15 12,15 C 12,15 13,14 13,15 C 13,15 14,14 15,15 C 15,15 15,14 16,14 C 16,14 15.53,13.2 16,13 C 16,13 17,12 17,13 C 17,13 18,12 19,12 C 19,12 19,11 20,11 C 20,11 21,10 21,10 C 21,10 21.5,10 22,10 Z' fill='%23fff' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E"); }
         
-        /* KAMIKAZE AHORA ABSORBE EL COLOR DEL TEMA ACTIVO (var(--primary)) */
         .piece-black { filter: brightness(0) drop-shadow(0 0 12px var(--primary)) drop-shadow(0 8px 10px rgba(0,0,0,0.8)); }
 
         .blocked {
@@ -316,7 +292,7 @@
         }
         .blocked::before { content: '✖'; font-size: 2rem; color: var(--primary); opacity: 0.6; }
 
-        /* MODALES (HISTORIAL & INSTRUCCIONES) */
+        /* MODALES */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(5, 7, 10, 0.85); backdrop-filter: blur(10px);
             z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px;
@@ -355,7 +331,7 @@
         .badge { position: absolute; top: -4px; right: -4px; background: var(--primary); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 1px 5px; border-radius: 50%; display: none; }
         .show-badge .badge { display: block; }
         
-        .inactive-icon { opacity: 0.2; } /* Fichas sin uso al 20% */
+        .inactive-icon { opacity: 0.2; } 
         .active-icon { opacity: 1; }
 
         .diff-controls { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 8px; }
@@ -432,19 +408,19 @@
                     <button class="btn-blue" onclick="actionTransform('flipV')" id="btn-flipv">↕ Sim V</button>
                 </div>
 
-                <!-- Deshacer + Tamaños 3x3/4x4 alineados a la cuadrícula -->
+                <!-- Deshacer + Tamaños 3x3/4x4 alineados a la cuadrícula con estética oscura -->
                 <div class="undo-row">
-                    <button class="btn-undo" onclick="undoMove()">↩ Deshacer</button>
+                    <button class="btn-dark" onclick="undoMove()">↩ Deshacer</button>
                     <div class="classic-sizes" id="classic-sizes">
-                        <button class="btn-blue size-btn" id="btn-classic-3" onclick="setClassicSize(3)">3x3</button>
-                        <button class="btn-blue size-btn inactive-size" id="btn-classic-4" onclick="setClassicSize(4)">4x4</button>
+                        <button class="btn-dark" id="btn-classic-3" onclick="setClassicSize(3)">3x3</button>
+                        <button class="btn-dark inactive-size" id="btn-classic-4" onclick="setClassicSize(4)">4x4</button>
                     </div>
                 </div>
 
                 <!-- Reiniciar Fase + Empezar de 0 -->
                 <div class="action-row">
-                    <button class="btn-action" onclick="resetPhase()">⟲ Fase</button>
-                    <button class="btn-action" onclick="restartGame()">⟲ Todo</button>
+                    <button class="btn-dark" onclick="resetPhase()">⟲ Fase</button>
+                    <button class="btn-dark" onclick="restartGame()">⟲ Todo</button>
                 </div>
 
             </div>
@@ -483,11 +459,11 @@
                     <div class="piece-wrapper" onclick="toggleManualPiece(4)"><div id="icon-4" class="piece p-4 inactive-icon"></div><span class="badge">2</span></div>
                     <div class="piece-wrapper" onclick="toggleManualPiece(5)"><div id="icon-5" class="piece p-5 inactive-icon"></div><span class="badge">2</span></div>
                 </div>
-                <button class="btn-action" style="margin-top: 10px; width: 100%; padding: 8px;" onclick="forceRecalculate()">Generar Puzle</button>
+                <button class="btn-dark" style="margin-top: 10px; width: 100%;" onclick="forceRecalculate()">Generar Puzle</button>
             </div>
         </div>
 
-        <button class="btn-action" style="background: transparent; border: 1px solid var(--surface-border); padding: 8px; margin-top: 5px;" onclick="openInstructions()">Leer Instrucciones</button>
+        <button class="btn-dark" style="background: transparent; box-shadow: none; border: 1px solid var(--surface-border); margin-top: 5px;" onclick="openInstructions()">Leer Instrucciones</button>
     </div>
 
     <!-- MODAL HISTORIAL DE FASES -->
@@ -589,11 +565,11 @@
             
             if (btn3 && btn4) {
                 if (sz === 3) {
-                    btn3.className = 'btn-blue size-btn';
-                    btn4.className = 'btn-blue size-btn inactive-size';
+                    btn3.className = 'btn-dark';
+                    btn4.className = 'btn-dark inactive-size';
                 } else {
-                    btn3.className = 'btn-blue size-btn inactive-size';
-                    btn4.className = 'btn-blue size-btn';
+                    btn3.className = 'btn-dark inactive-size';
+                    btn4.className = 'btn-dark';
                 }
             }
         }
