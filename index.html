@@ -10,7 +10,7 @@
     
     <style>
         :root {
-            /* PALETA CYBER DARK NEÓN (4x4) */
+            /* PALETA CYBER DARK NEÓN */
             --bg-color: #0b0e14;
             --surface-dark: rgba(20, 25, 35, 0.85);
             --surface-border: rgba(255, 42, 84, 0.25);
@@ -37,7 +37,6 @@
         }
 
         body.theme-blue {
-            /* PALETA CYBER AZUL (3x3) */
             --dark-square: #121e2b;
             --light-square: #1e3044;
             --primary: #00f0ff;
@@ -556,7 +555,10 @@
         let m_dist = 6;
 
         function getRules() {
-            if (gameMode === 'classic') return {size: classicSize, rot: true, sym: true, obs: false, blk: true};
+            if (gameMode === 'classic') {
+                if (classicSize === 3) return {size: 3, rot: false, sym: false, obs: false, blk: false};
+                else return {size: 4, rot: true, sym: true, obs: false, blk: true};
+            }
             if (gameMode === 'manual') return {size: m_size, rot: m_rot, sym: m_sym, obs: m_obs, blk: m_blk};
             
             let r = {size: unlockStage >= 10 ? 4 : 3, rot: false, sym: false, obs: false, blk: false};
@@ -653,13 +655,10 @@
                 } else if (gameMode === 'classic') {
                     if (boardSize === 4) {
                         toPlace = [1, 2, 3, 4, 5];
-                        toPlace.push(Math.floor(Math.random()*5)+6);
+                        toPlace.push([3, 4, 5][Math.floor(Math.random() * 3)]); // Torre, Alfil o Caballo extra
+                        toPlace.push(Math.floor(Math.random() * 5) + 6); // Kamikaze
                     } else {
-                        toPlace = [1];
-                        let pool = [2, 3, 4, 5];
-                        pool.sort(() => Math.random() - 0.5);
-                        toPlace.push(pool[0], pool[1]);
-                        toPlace.push(Math.floor(Math.random()*5)+6);
+                        toPlace = [1, 2, 3, 4, 5]; // 3x3: Rey, Dama, Torre, Alfil, Caballo
                     }
                 } else {
                     for(let i=0; i<5; i++) {
@@ -831,13 +830,13 @@
             }
         }
 
+        // DIBUJO DE FLECHAS SVG Y COLORES DINÁMICOS
         function drawArrow(step, sz) {
             const content = document.getElementById('overlay-content');
             if (!content) return;
             content.innerHTML = '';
             
             const strokeWidth = 2; 
-            const color = "var(--primary)"; 
             const filter = 'filter="url(#arrow-shadow)"';
             
             if (step.type === 'move' || step.type === 'capture') {
@@ -874,39 +873,39 @@
                 let wing2Y = shaftY - perpY;
 
                 content.innerHTML = `
-                    <g ${filter}>
-                        <line x1="${startX}" y1="${startY}" x2="${shaftX}" y2="${shaftY}" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="${endX},${endY} ${wing1X},${wing1Y} ${wing2X},${wing2Y}" fill="${color}" />
+                    <g ${filter} class="dynamic-svg-color">
+                        <line x1="${startX}" y1="${startY}" x2="${shaftX}" y2="${shaftY}" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="${endX},${endY} ${wing1X},${wing1Y} ${wing2X},${wing2Y}" fill="currentColor" />
                     </g>
                 `;
             } else if (step.type === 'rotCW') {
                 content.innerHTML = `
-                    <g ${filter}>
-                        <path d="M 50 18 A 32 32 0 1 1 20 50" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="20,53 15,44 25,46" fill="${color}" />
+                    <g ${filter} class="dynamic-svg-color">
+                        <path d="M 50 18 A 32 32 0 1 1 20 50" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="20,53 15,44 25,46" fill="currentColor" />
                     </g>
                 `;
             } else if (step.type === 'rotCCW') {
                 content.innerHTML = `
-                    <g ${filter}>
-                        <path d="M 50 18 A 32 32 0 1 0 80 50" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="80,53 75,46 85,44" fill="${color}" />
+                    <g ${filter} class="dynamic-svg-color">
+                        <path d="M 50 18 A 32 32 0 1 0 80 50" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="80,53 75,46 85,44" fill="currentColor" />
                     </g>
                 `;
             } else if (step.type === 'flipH') {
                 content.innerHTML = `
-                    <g ${filter}>
-                        <line x1="22" y1="50" x2="78" y2="50" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="18,50 24,46 24,54" fill="${color}" />
-                        <polygon points="82,50 76,46 76,54" fill="${color}" />
+                    <g ${filter} class="dynamic-svg-color">
+                        <line x1="22" y1="50" x2="78" y2="50" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="18,50 24,46 24,54" fill="currentColor" />
+                        <polygon points="82,50 76,46 76,54" fill="currentColor" />
                     </g>
                 `;
             } else if (step.type === 'flipV') {
                 content.innerHTML = `
-                    <g ${filter}>
-                        <line x1="50" y1="22" x2="50" y2="78" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="50,18 46,24 54,24" fill="${color}" />
-                        <polygon points="50,82 46,76 54,76" fill="${color}" />
+                    <g ${filter} class="dynamic-svg-color">
+                        <line x1="50" y1="22" x2="50" y2="78" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="50,18 46,24 54,24" fill="currentColor" />
+                        <polygon points="50,82 46,76 54,76" fill="currentColor" />
                     </g>
                 `;
             }
@@ -1368,7 +1367,7 @@
             let currentSearchDist = 6;
             
             if (gameMode === 'manual') currentSearchDist = m_dist;
-            else if (gameMode === 'classic') currentSearchDist = classicSize === 3 ? (Math.floor(Math.random() * 4) + 3) : (Math.floor(Math.random() * 4) + 4);
+            else if (gameMode === 'classic') currentSearchDist = Math.floor(Math.random() * 6) + 4; // 4 to 9
             else {
                 let autoDistMap = [2, 3, 4, 4, 5, 5, 6, 7, 8, 9, 6, 7, 8];
                 currentSearchDist = unlockStage < autoDistMap.length ? autoDistMap[unlockStage] : 9;
@@ -1386,8 +1385,8 @@
                     document.getElementById('loading').style.display = 'none';
                 } else {
                     if (attempts > 4) { 
-                        if (currentSearchDist > 3) currentSearchDist--; 
-                        else currentSearchDist = classicSize === 3 ? 4 : 5; 
+                        if (currentSearchDist > 4) currentSearchDist--; 
+                        else currentSearchDist = (gameMode === 'classic') ? (Math.floor(Math.random() * 6) + 4) : 4; 
                         attempts = 0; 
                         document.getElementById('loading-sub').innerText = `Ajustando a ${currentSearchDist} movs...`;
                     }
@@ -1425,7 +1424,7 @@
                     document.getElementById('loading').style.display = 'none';
                 } else {
                     if (attempts > 4) { 
-                        if (currentSearchDist > 3) currentSearchDist--; 
+                        if (currentSearchDist > 4) currentSearchDist--; 
                         else currentSearchDist = m_dist;
                         attempts = 0; 
                         document.getElementById('loading-sub').innerText = `Ajustando a ${currentSearchDist} movs...`;
