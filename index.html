@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DRACT4 - Ajedrez Puzzle Evolucionado</title>
+    <!-- Tipografía SUSE -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* TEMA AZUL (DRACT 3 - 3x3) */
+            --bg-color: #f0f4f8;
+            --dark-square: #4b7399;
+            --light-square: #eaeff4;
+            --primary: #4b7399;
+            --primary-hover: #3b5b7a;
+            --primary-disabled: #9cb1c4;
+            --text-color: #222;
+            --highlight: rgba(255, 255, 0, 0.5);
+            --border-color: #222;
+            --grid-size: 3; 
+        }
+
+        /* TEMA ROJO Y GRIS (DRACT 4 - 4x4) */
+        body.theme-red {
+            --bg-color: #fdfdfd;
+            --dark-square: rgb(180,0,0);
+            --light-square: rgb(213,213,213);
+            --primary: rgb(180,0,0);
+            --primary-hover: rgb(140,0,0);
+            --primary-disabled: rgb(213,213,213);
+        }
+
+        body {
+            font-family: 'SUSE', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.5s ease;
+        }
+
+        /* --- DISEÑO BASE PARA PC --- */
+        .layout {
+            display: flex; flex-direction: row; flex-wrap: wrap; gap: 40px;
+            justify-content: center; align-items: flex-start;
+            max-width: 1200px; width: 100%; margin-top: 10px;
+        }
+
+        .col-left { display: flex; flex-direction: column; width: 280px; gap: 15px; }
+        .col-center { display: flex; flex-direction: column; align-items: center; width: 450px; gap: 15px; }
+        .col-right { display: flex; flex-direction: column; align-items: center; width: 250px; gap: 15px; }
+
+        h3 { margin-top: 0; text-align: center; font-size: 1.1rem; margin-bottom: 10px; font-weight: 700; }
+
+        .panel-box {
+            background: #fff; padding: 15px; border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%;
+            box-sizing: border-box; border: 2px solid var(--primary);
+            transition: border-color 0.5s ease;
+        }
+
+        .box-stats { margin-bottom: 0; padding: 12px; }
+        .stats-inner { display: flex; flex-direction: row; width: 100%; }
+        .stat-group { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .stat-line { font-size: 0.9rem; margin: 0 0 5px 0; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; text-align: center;}
+        .stat-value { font-weight: 800; font-size: 1.8rem; color: var(--primary); transition: color 0.5s ease;}
+        
+        #obj-lbl { color: var(--primary); }
+
+        .progression-text { font-size: 0.95rem; font-weight: 600; color: #444; margin-bottom: 5px; text-align: center; }
+        .streak-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
+        .dot { width: 15px; height: 15px; border-radius: 50%; background: #ccc; border: 2px solid #aaa; transition: all 0.3s;}
+        .dot.filled { background: #27ae60; border-color: #219653; }
+
+        .box-mode { width: 100%; margin-bottom: 0; }
+        .btn-mode { background-color: rgb(180,0,0); transition: background-color 0.3s; }
+        .btn-mode:hover { background-color: rgb(140,0,0); }
+        
+        .history-container { background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; width: 100%; border: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; text-align: center; }
+        th, td { padding: 10px 5px; border-bottom: 1px solid #ddd; font-size: 0.95rem; }
+        th { background-color: var(--primary); color: white; font-weight: 600; transition: background-color 0.5s ease;}
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .history-wrap { max-height: 250px; overflow-y: auto; }
+
+        button {
+            color: #fff; border: none; padding: 12px; font-size: 1rem; cursor: pointer;
+            border-radius: 6px; font-family: 'SUSE', sans-serif; font-weight: 700;
+            transition: background-color 0.2s, transform 0.1s; width: 100%; box-sizing: border-box;
+        }
+        
+        .btn-blue { background-color: var(--primary); transition: background-color 0.5s ease; }
+        .btn-blue:hover:not(:disabled) { background-color: var(--primary-hover); }
+        .btn-blue:active:not(:disabled) { transform: scale(0.97); }
+        .btn-blue:disabled { background-color: var(--primary-disabled); color: #eef2f5; cursor: not-allowed; transform: none; }
+
+        .btn-action { background-color: #666; }
+        .btn-action:hover { background-color: #444; }
+        .btn-start { background-color: #222; margin-top: 15px; }
+        .btn-start:hover { background-color: #000; }
+
+        .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .btn-undo { grid-column: span 2; background-color: #666; margin-top: 2px; }
+        .btn-undo:hover { background-color: #444; }
+
+        /* Miniaturas Manuales */
+        .mini-icons-container {
+            display: flex; justify-content: center; gap: 12px; margin-top: 5px;
+            background: var(--light-square); padding: 8px; border-radius: 6px; border: 2px solid var(--border-color);
+            transition: background-color 0.5s ease;
+        }
+        .mini-icons-container .piece-wrapper {
+            position: relative; width: 35px; height: 35px; cursor: pointer;
+        }
+        .mini-icons-container .piece { width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }
+        
+        .badge {
+            position: absolute; top: -5px; right: -5px; background: #c0392b; color: white;
+            font-size: 0.7rem; font-weight: bold; padding: 2px 5px; border-radius: 50%;
+            display: none; border: 1px solid white;
+        }
+        .show-badge .badge { display: block; }
+
+        .active-icon { filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.3)); opacity: 1; }
+        .inactive-icon { filter: invert(85%) sepia(15%) saturate(300%) hue-rotate(185deg) brightness(120%) contrast(80%); opacity: 0.3; }
+
+        /* Dificultad manual */
+        .diff-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
+        .diff-controls button { width: auto; padding: 8px 15px; font-size: 1.2rem; }
+
+        /* Tableros Dinámicos */
+        .board {
+            position: relative;
+            display: grid; 
+            grid-template-columns: repeat(var(--grid-size), 1fr); 
+            grid-template-rows: repeat(var(--grid-size), 1fr);
+            border: 6px solid var(--border-color); width: 450px; height: 450px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3); background-color: var(--light-square);
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+        }
+        .board.mini { width: 200px; height: 200px; border-width: 4px; }
+        .cell { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
+        #main-board .cell { cursor: pointer; transition: background-color 0.5s ease; }
+        .cell.dark { background-color: var(--dark-square); }
+        .cell.light { background-color: var(--light-square); }
+        .cell.selected::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--highlight); border: 4px solid #f1c40f; pointer-events: none; }
+
+        /* MODO SOLUCIÓN - Tablero Gris e Inactivo */
+        .board-solution-locked {
+            --dark-square: #95a5a6 !important;
+            --light-square: #ecf0f1 !important;
+            border-color: #7f8c8d !important;
+        }
+        .board-solution-locked .piece {
+            filter: grayscale(100%) drop-shadow(2px 4px 4px rgba(0,0,0,0.4)) opacity(0.65);
+        }
+        .board-solution-locked .piece-black {
+            filter: grayscale(100%) brightness(0) drop-shadow(2px 4px 4px rgba(0,0,0,0.4)) opacity(0.65);
+        }
+
+        /* Capa SVG para las Flechas */
+        #board-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100;
+        }
+
+        /* Animaciones para la solución */
+        @keyframes blink-anim {
+            0% { filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.4)) scale(1); }
+            50% { filter: drop-shadow(0px 0px 15px #f1c40f) scale(1.15); }
+            100% { filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.4)) scale(1); }
+        }
+        @keyframes board-blink {
+            0% { transform: scale(1); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+            50% { transform: scale(0.96); box-shadow: 0 0 30px var(--primary); }
+            100% { transform: scale(1); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+        }
+        .board-blinking { animation: board-blink 0.5s ease-in-out infinite; }
+
+        /* Piezas Vectoriales */
+        .piece {
+            width: 85%; height: 85%; background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; 
+            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.4));
+            transition: filter 0.5s ease, opacity 0.5s ease;
+        }
+
+        .p-1 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 51 51'%3E%3Cg fill='none' fill-rule='evenodd' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22.5 11.63V6M20 8h5' stroke-linejoin='miter'/%3E%3Cpath d='M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5' fill='%23fff' stroke-linecap='butt' stroke-linejoin='miter'/%3E%3Cpath d='M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10.5 5 10.5v7' fill='%23fff'/%3E%3Cpath d='M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0'/%3E%3C/g%3E%3C/svg%3E"); }
+        .p-2 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 51 51'%3E%3Cg fill='none' fill-rule='evenodd' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM16 8.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM33 8.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0z' fill='%23fff' stroke-linecap='butt'/%3E%3Cpath d='M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-14V25L7 14l2 12' fill='%23fff' stroke-linecap='butt'/%3E%3Cpath d='M9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z' fill='%23fff' stroke-linecap='butt'/%3E%3Cpath d='M11 38.5a35 35 0 0 0 23 0M11 35.5a35 35 0 0 0 23 0M11 32.5a35 35 0 0 0 23 0M11 29.5a35 35 0 0 0 23 0'/%3E%3C/g%3E%3C/svg%3E"); }
+        .p-3 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 51 51'%3E%3Cg fill='%23fff' fill-rule='evenodd' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5H11z' stroke-linecap='butt'/%3E%3Cpath d='M34 14l-3 3H14l-3-3'/%3E%3Cpath d='M31 17v12.5H14V17' stroke-linecap='butt' stroke-linejoin='miter'/%3E%3Cpath d='M31 29.5l1.5 2.5h-20l1.5-2.5'/%3E%3Cpath d='M11 14h23' fill='none' stroke-linejoin='miter'/%3E%3C/g%3E%3C/svg%3E"); }
+        .p-4 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 51 51'%3E%3Cg fill='none' fill-rule='evenodd' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg fill='%23fff' stroke-linecap='butt'%3E%3Cpath d='M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2zM15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z'/%3E%3C/g%3E%3Cpath d='M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5' stroke-linejoin='miter'/%3E%3C/g%3E%3C/svg%3E"); }
+        .p-5 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 49 49'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18'/%3E%3Cpath d='M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26.5 C 6,24 10,23 11,24 C 11,24 11,22 10,21 C 10,21 11,20.12 11,20 C 11,20 10.09,19 11,18 C 11,18 10,17 11,16 C 11,16 11,15 12,15 C 12,15 13,14 13,15 C 13,15 14,14 15,15 C 15,15 15,14 16,14 C 16,14 15.53,13.2 16,13 C 16,13 17,12 17,13 C 17,13 18,12 19,12 C 19,12 19,11 20,11 C 20,11 21,10 21,10 C 21,10 21.5,10 22,10 Z'/%3E%3Cpath d='M 20,8 C 18,6 16,6 14,8 C 15,10 16,10 18,10 C 19,10 19.5,9 20,8 Z'/%3E%3Cpath d='M 22,10 C 24,7 26,7 28,10 C 27,11 25.5,12 24,11 C 23,10 22.5,10 22,10 Z'/%3E%3Cpath d='M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 Z' fill='%23000'/%3E%3Cpath d='M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 Z' transform='matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)' fill='%23000'/%3E%3C/g%3E%3C/svg%3E"); }
+        
+        /* Kamikaze Negro */
+        .piece-black { filter: brightness(0) drop-shadow(2px 4px 4px rgba(0,0,0,0.4)); }
+
+        /* Obstáculos */
+        .blocked {
+            background-color: transparent !important;
+            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);
+            display: flex; justify-content: center; align-items: center;
+        }
+        .blocked::before { content: '✖'; font-size: 2.5rem; color: rgba(0,0,0,0.7); font-weight: bold; }
+
+        #loading {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(255,255,255,0.85); display: none; 
+            justify-content: center; align-items: center; flex-direction: column;
+            font-size: 2rem; font-weight: bold; color: var(--primary); z-index: 1000;
+        }
+        #loading-text { margin-bottom: 10px; }
+        #loading-sub { font-size: 1rem; color: #666; font-weight: normal; }
+
+        /* --- BOTÓN DE SOLUCIÓN Y MODALES --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 10px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 3px solid var(--primary); }
+        .modal-content h2 { margin-top: 0; color: var(--primary); text-align: center; font-weight: 800; letter-spacing: 1px;}
+        .modal-content h3 { color: var(--primary); margin-bottom: 5px; text-align: left; font-size: 1.2rem; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: 700; margin-top: 20px;}
+        .modal-content p, .modal-content ul { font-size: 1rem; line-height: 1.5; margin-top: 5px; color: #333; }
+        .modal-content ul { padding-left: 20px; }
+
+        .btn-solution {
+            position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px;
+            border-radius: 50%; background-color: var(--primary); color: white; border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4); cursor: pointer; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            transition: transform 0.2s, background-color 0.5s ease;
+            font-family: 'SUSE', sans-serif;
+        }
+        .btn-solution:hover { transform: scale(1.1); background-color: var(--primary-hover); }
+        
+        #solution-step-text { display: none; font-size: 1.8rem; font-weight: 800; line-height: 1; margin-top: 2px;}
+
+        /* --- DISEÑO MÓVIL --- */
+        @media (max-width: 900px) {
+            .layout {
+                display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+                grid-template-areas: 
+                    "mode mode stats stats stats stats" 
+                    "main main main main main main" 
+                    "target target target ctrls ctrls ctrls" 
+                    "actions actions actions actions actions actions" 
+                    "config config config config config config" 
+                    "history history history history history history"; 
+                padding-bottom: 20px;
+            }
+            .col-left, .col-center, .col-right { display: contents; }
+            .box-stats { grid-area: stats; margin-bottom: 0; padding: 8px 4px; }
+            .box-main { grid-area: main; justify-self: center; width: 100%; max-width: 450px; }
+            .box-target { grid-area: target; justify-self: center; align-self: center; width: 100%; }
+            .box-ctrls { grid-area: ctrls; align-self: center; width: 100%; }
+            .box-actions { grid-area: actions; display: flex; gap: 10px; margin-top: 0; }
+            .box-config { grid-area: config; }
+            .box-history { grid-area: history; }
+            .box-mode { grid-area: mode; margin-bottom: 0; align-self: stretch; }
+            .btn-mode { margin-top: 0; height: 100%; font-size: 0.8rem; padding: 4px; display: flex; align-items: center; justify-content: center; line-height: 1.1; }
+            .btn-start { margin-top: 0; }
+            .board { width: 100%; height: auto; aspect-ratio: 1/1; border-width: 4px; }
+            .board.mini { width: 100%; max-width: 250px; height: auto; aspect-ratio: 1/1; border-width: 3px; margin-bottom: 0; }
+            .box-target h3 { display: none; }
+            .stat-group { padding: 0; }
+            .stat-line { font-size: 0.65rem; margin: 0 0 2px 0; letter-spacing: 0; }
+            .stat-value { font-size: 1.2rem; margin: 0; }
+            .controls-grid { gap: 6px; }
+            .controls-grid button { padding: 12px 2px; font-size: 0.85rem; }
+            .btn-undo { padding: 10px; font-size: 0.95rem; }
+            .btn-solution { bottom: 15px; right: 15px; width: 50px; height: 50px; }
+            .btn-solution svg { width: 20px; height: 20px; }
+            #solution-step-text { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading">
+        <div id="loading-text">Calculando Nivel...</div>
+        <div id="loading-sub">Buscando puzle perfecto</div>
+    </div>
+
+    <!-- BOTÓN DE SOLUCIÓN FLOTANTE INTERACTIVO -->
+    <button class="btn-solution" id="btn-solution" onclick="nextSolutionStep()" title="Ver Solución">
+        <svg id="icon-question" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+        </svg>
+        <span id="solution-step-text">1</span>
+    </button>
+
+    <div class="layout">
+        <!-- COLUMNA IZQUIERDA -->
+        <div class="col-left">
+            <div class="box-mode">
+                <button class="btn-mode" id="btn-mode-toggle" onclick="toggleMode()">MODO CLÁSICO</button>
+            </div>
+            
+            <div class="box-history history-container">
+                <div class="history-wrap">
+                    <table id="history-table">
+                        <thead>
+                            <tr>
+                                <th>Fase</th>
+                                <th>Obj.</th>
+                                <th>Int.</th>
+                                <th>Pts.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="box-actions">
+                <button class="btn-action" onclick="resetPhase()">⟲ Reiniciar Fase</button>
+                <button class="btn-start" onclick="restartGame()">Empezar de Cero</button>
+            </div>
+        </div>
+
+        <!-- COLUMNA CENTRAL -->
+        <div class="col-center">
+            <div class="box-stats panel-box">
+                <div class="stats-inner">
+                    <div class="stat-group">
+                        <div class="stat-line">Fase</div>
+                        <div class="stat-value" id="lvl-lbl">1</div>
+                    </div>
+                    <div class="stat-group">
+                        <div class="stat-line">Objetivo</div>
+                        <div class="stat-value" id="obj-lbl">0</div>
+                    </div>
+                    <div class="stat-group">
+                        <div class="stat-line">Mov.</div>
+                        <div class="stat-value" id="mov-lbl">0</div>
+                    </div>
+                    <div class="stat-group">
+                        <div class="stat-line">Puntos</div>
+                        <div class="stat-value" id="score-lbl" style="color: #27ae60;">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-main" style="width: 100%; max-width: 450px; display: flex; justify-content: center;">
+                <div style="position: relative; width: 100%; aspect-ratio: 1/1;">
+                    <div id="main-board" class="board"></div>
+                </div>
+            </div>
+            
+            <div class="box-ctrls">
+                <div class="controls-grid">
+                    <button class="btn-blue" onclick="actionTransform('rotCW')" id="btn-rotcw">↻ +90°</button>
+                    <button class="btn-blue" onclick="actionTransform('rotCCW')" id="btn-rotccw">↺ -90°</button>
+                    <button class="btn-blue" onclick="actionTransform('flipH')" id="btn-fliph">↔ Sim H.</button>
+                    <button class="btn-blue" onclick="actionTransform('flipV')" id="btn-flipv">↕ Sim V.</button>
+                    <button class="btn-undo" onclick="undoMove()">↩ Deshacer Movimiento</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA -->
+        <div class="col-right">
+            <div class="box-target">
+                <h3>A conseguir</h3>
+                <div id="target-board" class="board mini"></div>
+            </div>
+
+            <div class="box-config panel-box">
+                <!-- Panel Auto -->
+                <div id="auto-config-view" style="display: none;">
+                    <div class="progression-text" id="prog-text">Progreso:</div>
+                    <div class="streak-dots">
+                        <div class="dot" id="dot-1"></div>
+                        <div class="dot" id="dot-2"></div>
+                    </div>
+                    <div style="font-size:0.8rem; color:#666; text-align:center;">Supera el Objetivo exacto para avanzar.</div>
+                </div>
+
+                <!-- Panel Manual -->
+                <div id="manual-config-view" style="display: none;">
+                    <div><strong>Ajustar Objetivo:</strong></div>
+                    <div class="diff-controls">
+                        <button class="btn-blue" onclick="changeMinMoves(-1)">-</button>
+                        <span id="min-moves-display" style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">6</span>
+                        <button class="btn-blue" onclick="changeMinMoves(1)">+</button>
+                    </div>
+                    <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; text-align: left; font-size: 0.9rem;">
+                        <label style="cursor: pointer;"><input type="checkbox" id="chk-4x4" onchange="toggleManualRule('4x4')"> Tablero 4x4</label>
+                        <label style="cursor: pointer;"><input type="checkbox" id="chk-rot" onchange="toggleManualRule('rot')"> Giros</label>
+                        <label style="cursor: pointer;"><input type="checkbox" id="chk-sym" onchange="toggleManualRule('sym')"> Simetrías</label>
+                        <label style="cursor: pointer;"><input type="checkbox" id="chk-obs" onchange="toggleManualRule('obs')"> Añadir Obstáculos</label>
+                        <label style="cursor: pointer;"><input type="checkbox" id="chk-blk" onchange="toggleManualRule('blk')"> Kamikaze Negro</label>
+                    </div>
+                    
+                    <div style="margin-top: 15px;"><strong>Piezas (Doble Clic = x2):</strong></div>
+                    <div class="mini-icons-container">
+                        <div class="piece-wrapper" onclick="toggleManualPiece(1)">
+                            <div id="icon-1" class="piece p-1 active-icon"></div><span class="badge">2</span>
+                        </div>
+                        <div class="piece-wrapper" onclick="toggleManualPiece(2)">
+                            <div id="icon-2" class="piece p-2 inactive-icon"></div><span class="badge">2</span>
+                        </div>
+                        <div class="piece-wrapper" onclick="toggleManualPiece(3)">
+                            <div id="icon-3" class="piece p-3 inactive-icon"></div><span class="badge">2</span>
+                        </div>
+                        <div class="piece-wrapper" onclick="toggleManualPiece(4)">
+                            <div id="icon-4" class="piece p-4 inactive-icon"></div><span class="badge">2</span>
+                        </div>
+                        <div class="piece-wrapper" onclick="toggleManualPiece(5)">
+                            <div id="icon-5" class="piece p-5 inactive-icon"></div><span class="badge">2</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-action" style="margin-top:15px; margin-bottom:0;" onclick="forceRecalculate()">Generar otro Puzle</button>
+                </div>
+                
+                <!-- Panel Clásico -->
+                <div id="classic-config-view" style="display: block; text-align: center;">
+                    <div class="progression-text" id="classic-title" style="color: var(--primary);">DRACT (Clásico)</div>
+                    <div style="margin: 10px 0; display: flex; justify-content: center; gap: 10px;">
+                        <button class="btn-blue" id="btn-classic-3" style="width: 80px; padding: 6px;" onclick="setClassicSize(3)">3x3</button>
+                        <button class="btn-blue" id="btn-classic-4" style="width: 80px; padding: 6px;" onclick="setClassicSize(4)">4x4</button>
+                    </div>
+                    <div id="classic-desc" style="font-size:0.85rem; color:#666;">Tablero 4x4 limpio. <br>Kamikaze Negro Activo.<br><br>Objetivos entre 4 y 7 movimientos.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTÓN INSTRUCCIONES MAIN -->
+    <div style="display: flex; justify-content: center; width: 100%; margin-top: 30px; margin-bottom: 20px;">
+        <button class="btn-action" style="width: fit-content; padding: 12px 40px; font-size: 1.1rem; border-radius: 30px;" onclick="openInstructions()">Ver Instrucciones</button>
+    </div>
+
+    <!-- MODAL DE INSTRUCCIONES -->
+    <div id="instructions-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Instrucciones de DRACT 4</h2>
+            <p><strong>Meta:</strong> Consigue que tu tablero principal sea exactamente igual que la imagen de muestra ("A conseguir").</p>
+
+            <h3>Objetivo y Puntuación</h3>
+            <p>El valor <strong>Objetivo</strong> (en rojo) te indica el número mínimo de movimientos en los que se puede resolver la fase.</p>
+            <ul>
+                <li>Si resuelves la fase en un número de movimientos <strong>igual o menor</strong> al Objetivo, sumas esos puntos.</li>
+                <li>Si logras resolverlo en <strong>menos</strong> movimientos de los que indica el Objetivo, ¡Obtendrás puntuación doble!</li>
+                <li>Si excedes el Objetivo, la penalización es 1 a 1: <strong>-1 punto por cada movimiento extra</strong>. En MODO JUEGO, si tu puntuación total baja de 0, ¡Pierdes la partida!</li>
+            </ul>
+
+            <h3>Movimientos, Transformaciones y Kamikaze Negro</h3>
+            <p>Las piezas se mueven <strong>igual que en el ajedrez tradicional</strong>. Toca una pieza y luego una casilla vacía para moverla. Tanto mover una pieza como usar los botones azules para girar/reflejar el tablero <strong>cuentan como 1 movimiento</strong>.</p>
+            <p><strong>Casillas con X:</strong> Son obstáculos infranqueables. Las piezas no pueden caer ahí ni atravesarlas (salvo el Caballo en su salto en L).</p>
+            <p><strong>El Kamikaze Negro:</strong> Es tuyo y lo mueves tú. Puede moverse por casillas vacías, pero si lo mueves a una casilla ocupada por una pieza blanca, el Kamikaze se come a la blanca y <strong>ambas desaparecen del tablero</strong>. Cuando aparece el Kamikaze Negro en tu tablero, en la imagen "A conseguir" verás que ha desaparecido junto con una pieza blanca.</p>
+
+            <h3>Modo Clásico (Inicial)</h3>
+            <p>Elige entre la liga **DRACT 3 (3x3)** o la liga mayor **DRACT 4 (4x4)**. El Kamikaze Negro está activo de serie (sin obstáculos). El motor buscará aleatoriamente puzles adaptados a cada tablero. ¡Puro desafío mental!</p>
+
+            <h3>Modo Juego (Progresión)</h3>
+            <p>Empezarás en la liga 3x3 (Azul) solo con el Rey. Cada vez que logres <strong>2 aciertos consecutivos</strong>, desbloquearás nuevas mecánicas:<br>
+            <strong>Dama > Torre > Giros > Alfil > Caballo > Simetrías > Objetivo 7 > Obj. 8 > Obj. 9.</strong><br>
+            Al superar el Nivel 9, darás el salto a la <strong>Liga 4x4 (Rojo)</strong>, recibirás +30 puntos y te enfrentarás a la inclusión de obstáculos y el Kamikaze Negro progresivamente.</p>
+            
+            <button class="btn-blue" style="margin-top: 15px;" onclick="closeInstructions()">¡A jugar!</button>
+        </div>
+    </div>
+
+    <script>
+        // === MOTOR MATEMÁTICO FLAT GRID POR CAPAS ===
+        // 0 = Vacío
+        // 1 = Rey, 2 = Dama, 3 = Torre, 4 = Alfil, 5 = Caballo (Blancas)
+        // 6 = Rey, 7 = Dama, 8 = Torre, 9 = Alfil, 10 = Caballo (Negras Kamikaze)
+        // 99 = Obstáculo (X)
+
+        let gameMode = 'classic'; 
+        let classicSize = 4; // 3 o 4 para el Modo Clásico
+        
+        let startGrid = null;   
+        let currentGrid = null; 
+        let targetGrid = null;  
+        let boardSize = 4;
+        
+        let historyStates = [];
+        let currentPhase = 1;
+        let movesCount = 0;
+        let targetDist = 0;
+        let totalScore = 0;
+        let selectedIdx = null;
+
+        let unlockStage = 0; 
+        let consecutiveWins = 0;
+        let phaseStartTime = 0;
+        let phaseUndos = 0;
+        
+        // Memoria de la solución interactiva
+        let currentSolution = [];
+        let isPlayingSolution = false;
+        let solutionStepIndex = 0;
+        let originalGridBeforeSolution = null;
+        let isAnimatingStep = false;
+
+        const delay = ms => new Promise(res => setTimeout(res, ms));
+
+        // ESTADO MANUAL
+        let m_counts = [1, 0, 0, 0, 0]; 
+        let m_size = 3;
+        let m_rot = false, m_sym = false, m_obs = false, m_blk = false;
+        let m_dist = 6;
+
+        function getRules() {
+            if (gameMode === 'classic') return {size: classicSize, rot: true, sym: true, obs: false, blk: true};
+            if (gameMode === 'manual') return {size: m_size, rot: m_rot, sym: m_sym, obs: m_obs, blk: m_blk};
+            
+            let r = {size: unlockStage >= 10 ? 4 : 3, rot: false, sym: false, obs: false, blk: false};
+            if (unlockStage >= 3) r.rot = true;
+            if (unlockStage >= 6) r.sym = true;
+            if (unlockStage >= 10) r.obs = true;
+            if (unlockStage >= 11) r.blk = true;
+            return r;
+        }
+
+        function setClassicSize(sz) {
+            if (isPlayingSolution) exitSolutionMode();
+            classicSize = sz;
+            updateClassicUI();
+            resetPhase();
+        }
+
+        function updateClassicUI() {
+            const btn3 = document.getElementById('btn-classic-3');
+            const btn4 = document.getElementById('btn-classic-4');
+            const title = document.getElementById('classic-title');
+            const desc = document.getElementById('classic-desc');
+
+            if (classicSize === 3) {
+                if (btn3) { btn3.style.opacity = '1'; btn3.style.backgroundColor = 'var(--primary)'; }
+                if (btn4) { btn4.style.opacity = '0.4'; btn4.style.backgroundColor = '#666'; }
+                if (title) title.innerText = "DRACT 3 (Clásico 3x3)";
+                if (desc) desc.innerHTML = "Tablero 3x3 limpio.<br>Kamikaze Negro Activo.<br><br>Objetivos entre 3 y 6 movimientos.";
+            } else {
+                if (btn3) { btn3.style.opacity = '0.4'; btn3.style.backgroundColor = '#666'; }
+                if (btn4) { btn4.style.opacity = '1'; btn4.style.backgroundColor = 'var(--primary)'; }
+                if (title) title.innerText = "DRACT 4 (Clásico 4x4)";
+                if (desc) desc.innerHTML = "Tablero 4x4 limpio.<br>Kamikaze Negro Activo.<br><br>Objetivos entre 4 y 7 movimientos.";
+            }
+        }
+
+        function hasImmediateCapture(g, sz) {
+            for (let i = 0; i < g.length; i++) {
+                let p = g[i];
+                if (p >= 6 && p <= 10) { 
+                    let type = p - 5;
+                    let cx = i % sz;
+                    let cy = Math.floor(i / sz);
+                    let dirs = [];
+                    let maxSteps = sz;
+                    
+                    if (type === 1) { dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]; maxSteps = 1; }
+                    else if (type === 2) { dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]; }
+                    else if (type === 3) { dirs = [[-1,0],[1,0],[0,-1],[0,1]]; }
+                    else if (type === 4) { dirs = [[-1,-1],[-1,1],[1,-1],[1,1]]; }
+                    else if (type === 5) { dirs = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]; maxSteps = 1;}
+
+                    for (let d of dirs) {
+                        for (let step = 1; step <= maxSteps; step++) {
+                            let nx = cx + d[0] * step;
+                            let ny = cy + d[1] * step;
+                            if (nx >= 0 && nx < sz && ny >= 0 && ny < sz) {
+                                let ni = ny * sz + nx;
+                                let target = g[ni];
+                                if (target === 99) {
+                                    if (type !== 5) break; 
+                                    else continue; 
+                                }
+                                if (target !== 0 && target !== 99) {
+                                    if (target >= 1 && target <= 5) return true; 
+                                    break; 
+                                }
+                            } else break; 
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function generateInitialSetup() {
+            let r = getRules();
+            boardSize = r.size;
+            let grid;
+            let validSetup = false;
+            let attempts = 0;
+            
+            while (!validSetup && attempts < 100) {
+                grid = new Uint8Array(boardSize * boardSize);
+                let toPlace = [];
+                
+                if (gameMode === 'auto') {
+                    toPlace.push(1);
+                    if (unlockStage >= 1) toPlace.push(2);
+                    if (unlockStage >= 2) toPlace.push(3);
+                    if (unlockStage >= 4) toPlace.push(4);
+                    if (unlockStage >= 5) toPlace.push(5);
+                    if (r.blk) toPlace.push(Math.floor(Math.random()*5)+6); 
+                } else if (gameMode === 'classic') {
+                    toPlace = [1, 2, 3, 4, 5];
+                    toPlace.push(Math.floor(Math.random()*5)+6);
+                } else {
+                    for(let i=0; i<5; i++) {
+                        for(let j=0; j<m_counts[i]; j++) {
+                            toPlace.push(i+1);
+                        }
+                    }
+                    if (r.blk) toPlace.push(Math.floor(Math.random()*5)+6);
+                }
+
+                let allSpots = [];
+                for(let i=0; i<boardSize*boardSize; i++) allSpots.push(i);
+                allSpots.sort(() => Math.random() - 0.5);
+
+                if (r.obs) {
+                    let numObs = boardSize === 4 ? 2 : 1;
+                    for (let i = 0; i < numObs; i++) grid[allSpots.pop()] = 99;
+                }
+
+                toPlace.forEach(piece => {
+                    if (allSpots.length > 0) grid[allSpots.pop()] = piece;
+                });
+
+                if (r.blk) {
+                    if (!hasImmediateCapture(grid, boardSize)) {
+                        validSetup = true;
+                    }
+                } else {
+                    validSetup = true;
+                }
+                attempts++;
+            }
+
+            return grid;
+        }
+
+        function cloneGrid(g) { return new Uint8Array(g); }
+        function serializeGrid(g) { return String.fromCharCode.apply(null, g); }
+
+        function applyRotCW(g, sz) {
+            let ng = new Uint8Array(g.length);
+            for(let y=0; y<sz; y++) {
+                for(let x=0; x<sz; x++) {
+                    ng[x*sz + (sz-1-y)] = g[y*sz + x];
+                }
+            }
+            return ng;
+        }
+        function applyRotCCW(g, sz) {
+            let ng = new Uint8Array(g.length);
+            for(let y=0; y<sz; y++) {
+                for(let x=0; x<sz; x++) {
+                    ng[(sz-1-x)*sz + y] = g[y*sz + x];
+                }
+            }
+            return ng;
+        }
+        function applyFlipH(g, sz) {
+            let ng = new Uint8Array(g.length);
+            for(let y=0; y<sz; y++) {
+                for(let x=0; x<sz; x++) {
+                    ng[y*sz + (sz-1-x)] = g[y*sz + x];
+                }
+            }
+            return ng;
+        }
+        function applyFlipV(g, sz) {
+            let ng = new Uint8Array(g.length);
+            for(let y=0; y<sz; y++) {
+                for(let x=0; x<sz; x++) {
+                    ng[(sz-1-y)*sz + x] = g[y*sz + x];
+                }
+            }
+            return ng;
+        }
+
+        function getValidMoves(g, r) {
+            let moves = [];
+            let sz = r.size;
+            
+            for (let i = 0; i < g.length; i++) {
+                let p = g[i];
+                if (p === 0 || p === 99) continue;
+
+                let isBlack = p >= 6 && p <= 10;
+                let type = isBlack ? p - 5 : p;
+                let cx = i % sz;
+                let cy = Math.floor(i / sz);
+                let dirs = [];
+                let maxSteps = sz;
+                
+                if (type === 1) { dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]; maxSteps = 1; }
+                else if (type === 2) { dirs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]; }
+                else if (type === 3) { dirs = [[-1,0],[1,0],[0,-1],[0,1]]; }
+                else if (type === 4) { dirs = [[-1,-1],[-1,1],[1,-1],[1,1]]; }
+                else if (type === 5) { dirs = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]; maxSteps = 1;}
+
+                for (let d of dirs) {
+                    for (let step = 1; step <= maxSteps; step++) {
+                        let nx = cx + d[0] * step;
+                        let ny = cy + d[1] * step;
+                        if (nx >= 0 && nx < sz && ny >= 0 && ny < sz) {
+                            let ni = ny * sz + nx;
+                            let target = g[ni];
+                            
+                            if (target === 99) {
+                                if (type !== 5) break; 
+                                else continue; 
+                            }
+                            
+                            let ng = cloneGrid(g);
+                            if (target !== 0 && target !== 99) {
+                                let targetIsBlack = target >= 6 && target <= 10;
+                                if (isBlack && !targetIsBlack) {
+                                    ng[i] = 0; 
+                                    ng[ni] = 0; 
+                                    moves.push({ grid: ng, type: 'capture', from: i, to: ni });
+                                }
+                                break; 
+                            } else {
+                                ng[i] = 0;
+                                ng[ni] = p;
+                                moves.push({ grid: ng, type: 'move', from: i, to: ni });
+                            }
+                        } else break; 
+                    }
+                }
+            }
+            if (r.rot) { 
+                moves.push({ grid: applyRotCW(g, sz), type: 'rotCW' }); 
+                moves.push({ grid: applyRotCCW(g, sz), type: 'rotCCW' }); 
+            }
+            if (r.sym) { 
+                moves.push({ grid: applyFlipH(g, sz), type: 'flipH' }); 
+                moves.push({ grid: applyFlipV(g, sz), type: 'flipV' }); 
+            }
+            return moves;
+        }
+
+        function calculateTargetState(start, targetDistLimit) {
+            let r = getRules();
+            const MAX_LAYER = 15000; 
+
+            let queue = [{g: start, d: 0, path: []}];
+            let visited = new Set();
+            visited.add(serializeGrid(start));
+            
+            let validTargets = [];
+
+            let hasBlack = false;
+            for(let i=0; i<start.length; i++) if (start[i] >= 6 && start[i] <= 10) hasBlack = true;
+
+            let baseFrames = new Set();
+            baseFrames.add(serializeGrid(start));
+            if (r.rot) {
+                baseFrames.add(serializeGrid(applyRotCW(start, r.size)));
+                baseFrames.add(serializeGrid(applyRotCCW(start, r.size)));
+                baseFrames.add(serializeGrid(applyRotCW(applyRotCW(start, r.size), r.size)));
+            }
+            if (r.sym) {
+                baseFrames.add(serializeGrid(applyFlipH(start, r.size)));
+                baseFrames.add(serializeGrid(applyFlipV(start, r.size)));
+            }
+
+            for (let currentDepth = 0; currentDepth < targetDistLimit; currentDepth++) {
+                let nextLayer = [];
+                for (let curr of queue) {
+                    let moves = getValidMoves(curr.g, r);
+                    for (let m of moves) {
+                        let mStr = serializeGrid(m.grid);
+                        if (!visited.has(mStr)) {
+                            visited.add(mStr);
+                            nextLayer.push({ g: m.grid, d: curr.d + 1, path: [...curr.path, m] });
+                        }
+                    }
+                }
+                
+                if (nextLayer.length > MAX_LAYER) {
+                    nextLayer.sort(() => Math.random() - 0.5);
+                    nextLayer = nextLayer.slice(0, MAX_LAYER);
+                }
+                
+                queue = nextLayer;
+                if (queue.length === 0) break; 
+            }
+            
+            let finalDepthReached = queue.length > 0 ? targetDistLimit : 0; 
+            
+            if (finalDepthReached === targetDistLimit) {
+                for (let c of queue) {
+                    let isBlackDead = true;
+                    if (hasBlack) {
+                        for(let i=0; i<c.g.length; i++) {
+                            if (c.g[i] >= 6 && c.g[i] <= 10) { isBlackDead = false; break; }
+                        }
+                    }
+                    if (isBlackDead && !baseFrames.has(serializeGrid(c.g))) {
+                        validTargets.push(c);
+                    }
+                }
+            }
+
+            if (validTargets.length > 0) {
+                let chosen = validTargets[Math.floor(Math.random() * validTargets.length)];
+                return { g: chosen.g, d: chosen.d, path: chosen.path };
+            } else {
+                return { g: null, d: 0, path: [] }; 
+            }
+        }
+
+        // --- SISTEMA DE DIBUJO DE FLECHAS SVG DIRECTAS ---
+        function drawArrow(step, sz) {
+            const content = document.getElementById('overlay-content');
+            if (!content) return;
+            content.innerHTML = '';
+            
+            const strokeWidth = 2; 
+            const color = "rgb(180,0,0)"; 
+            const filter = 'filter="url(#arrow-shadow)"';
+            
+            if (step.type === 'move' || step.type === 'capture') {
+                let cellSize = 100 / sz;
+                let fx = (step.from % sz) * cellSize + (cellSize / 2);
+                let fy = Math.floor(step.from / sz) * cellSize + (cellSize / 2);
+                let tx = (step.to % sz) * cellSize + (cellSize / 2);
+                let ty = Math.floor(step.to / sz) * cellSize + (cellSize / 2);
+                
+                let dx = tx - fx;
+                let dy = ty - fy;
+                let len = Math.sqrt(dx*dx + dy*dy);
+                
+                if (len === 0) return;
+
+                let startCut = cellSize * 0.25;
+                let endCut = cellSize * 0.25;
+
+                let startX = fx + (dx / len) * startCut;
+                let startY = fy + (dy / len) * startCut;
+                let endX = tx - (dx / len) * endCut;
+                let endY = ty - (dy / len) * endCut;
+
+                let headLen = 4;
+                let headWidth = 3.5;
+
+                let shaftX = endX - (dx / len) * headLen;
+                let shaftY = endY - (dy / len) * headLen;
+
+                let perpX = (-dy / len) * (headWidth / 2);
+                let perpY = (dx / len) * (headWidth / 2);
+
+                let wing1X = shaftX + perpX;
+                let wing1Y = shaftY + perpY;
+                let wing2X = shaftX - perpX;
+                let wing2Y = shaftY - perpY;
+
+                content.innerHTML = `
+                    <g ${filter}>
+                        <line x1="${startX}" y1="${startY}" x2="${shaftX}" y2="${shaftY}" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="${endX},${endY} ${wing1X},${wing1Y} ${wing2X},${wing2Y}" fill="${color}" />
+                    </g>
+                `;
+                
+            } else if (step.type === 'rotCW') {
+                content.innerHTML = `
+                    <g ${filter}>
+                        <path d="M 50 18 A 32 32 0 1 1 20 50" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="20,53 15,44 25,46" fill="${color}" />
+                    </g>
+                `;
+            } else if (step.type === 'rotCCW') {
+                content.innerHTML = `
+                    <g ${filter}>
+                        <path d="M 50 18 A 32 32 0 1 0 80 50" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="80,53 75,46 85,44" fill="${color}" />
+                    </g>
+                `;
+            } else if (step.type === 'flipH') {
+                content.innerHTML = `
+                    <g ${filter}>
+                        <line x1="22" y1="50" x2="78" y2="50" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="18,50 24,46 24,54" fill="${color}" />
+                        <polygon points="82,50 76,46 76,54" fill="${color}" />
+                    </g>
+                `;
+            } else if (step.type === 'flipV') {
+                content.innerHTML = `
+                    <g ${filter}>
+                        <line x1="50" y1="22" x2="50" y2="78" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="50,18 46,24 54,24" fill="${color}" />
+                        <polygon points="50,82 46,76 54,76" fill="${color}" />
+                    </g>
+                `;
+            }
+        }
+
+        function clearArrow() {
+            const content = document.getElementById('overlay-content');
+            if (content) content.innerHTML = '';
+        }
+
+        // --- FUNCIONALIDAD BOTÓN SOLUCIÓN INTERACTIVO PASO A PASO ---
+        async function nextSolutionStep() {
+            if (isAnimatingStep) return;
+            if (!currentSolution || currentSolution.length === 0) {
+                alert("No hay solución calculada en memoria para este tablero.");
+                return;
+            }
+
+            const btnText = document.getElementById('solution-step-text');
+            const btnIcon = document.getElementById('icon-question');
+            const btnSolution = document.getElementById('btn-solution');
+            const boardEl = document.getElementById('main-board');
+
+            // 1. SI YA COMPLETAMOS LA SOLUCIÓN Y EL BOTÓN ESTÁ EN GRIS:
+            if (isPlayingSolution && solutionStepIndex >= currentSolution.length) {
+                exitSolutionMode();
+                return;
+            }
+
+            // 2. INICIAR MODO SOLUCIÓN (Primer Clic en "?")
+            if (!isPlayingSolution) {
+                isPlayingSolution = true;
+                originalGridBeforeSolution = cloneGrid(currentGrid); 
+                
+                boardEl.style.pointerEvents = 'none'; 
+                boardEl.classList.add('board-solution-locked'); // Pone el tablero gris
+                
+                // Rebobinamos al inicio del puzzle para mostrar la solución
+                currentGrid = cloneGrid(startGrid);
+                renderGrid('main', currentGrid, null);
+                
+                btnIcon.style.display = 'none';
+                btnText.style.display = 'block';
+                btnSolution.style.backgroundColor = "";
+                solutionStepIndex = 0;
+            }
+
+            // 3. EJECUTAR EL PASO ACTUAL
+            isAnimatingStep = true;
+            let step = currentSolution[solutionStepIndex];
+
+            drawArrow(step, boardSize);
+
+            if (step.type === 'move' || step.type === 'capture') {
+                let cellFrom = document.getElementById(`main-cell-${step.from}`);
+                if (cellFrom && cellFrom.firstChild) cellFrom.firstChild.style.animation = "blink-anim 0.4s ease-in-out infinite";
+                
+                await delay(750); 
+                
+                let tempGrid = step.grid;
+                renderGrid('main', tempGrid, null);
+                
+                let cellTo = document.getElementById(`main-cell-${step.to}`);
+                if (step.type === 'move') {
+                    if (cellTo && cellTo.firstChild) cellTo.firstChild.style.animation = "blink-anim 0.4s ease-in-out infinite";
+                } else {
+                    if (cellTo) cellTo.style.backgroundColor = "rgba(192, 57, 43, 0.5)";
+                }
+                
+                await delay(750); 
+                
+                if (cellTo && cellTo.firstChild) cellTo.firstChild.style.animation = "";
+                if (cellTo) cellTo.style.backgroundColor = "";
+            } else if (step.type.startsWith('rot') || step.type.startsWith('flip')) {
+                boardEl.classList.add('board-blinking');
+                
+                await delay(750);
+                
+                let tempGrid = step.grid;
+                renderGrid('main', tempGrid, null);
+                boardEl.classList.remove('board-blinking');
+                
+                await delay(750);
+            }
+
+            clearArrow();
+            solutionStepIndex++; // Incrementa el contador de pasos completados
+            
+            // 4. EL BOTÓN MUESTRA EL NÚMERO DEL PASO QUE SE ACABA DE COMPLETAR Y CAMBIA A GRIS SI HA TERMINADO
+            btnText.innerText = solutionStepIndex; 
+
+            if (solutionStepIndex >= currentSolution.length) {
+                btnSolution.style.backgroundColor = "#7f8c8d"; // Cambia el botón a GRIS al terminar
+            } else {
+                btnSolution.style.backgroundColor = ""; // Mantiene color del tema
+            }
+
+            isAnimatingStep = false;
+        }
+
+        function exitSolutionMode() {
+            isPlayingSolution = false;
+            solutionStepIndex = 0;
+            if (originalGridBeforeSolution) {
+                currentGrid = originalGridBeforeSolution; 
+            }
+            
+            let boardEl = document.getElementById('main-board');
+            boardEl.classList.remove('board-solution-locked'); // Quita el tablero gris
+            boardEl.style.pointerEvents = 'auto'; 
+            
+            const btnSolution = document.getElementById('btn-solution');
+            if (btnSolution) btnSolution.style.backgroundColor = ""; // Devuelve el color original del tema
+            
+            clearArrow();
+            renderAll(); 
+            
+            document.getElementById('solution-step-text').style.display = 'none';
+            document.getElementById('icon-question').style.display = 'block';
+        }
+
+        // --- CONTROLADORES UI ---
+        function toggleMode() {
+            if (isPlayingSolution) exitSolutionMode();
+            const btn = document.getElementById('btn-mode-toggle');
+            if (gameMode === 'classic') {
+                gameMode = 'auto';
+                btn.innerText = "MODO JUEGO";
+                btn.style.backgroundColor = "#27ae60";
+                document.getElementById('auto-config-view').style.display = 'block';
+                document.getElementById('manual-config-view').style.display = 'none';
+                document.getElementById('classic-config-view').style.display = 'none';
+            } else if (gameMode === 'auto') {
+                gameMode = 'manual';
+                btn.innerText = "MODO MANUAL";
+                btn.style.backgroundColor = "#8e44ad";
+                document.getElementById('auto-config-view').style.display = 'none';
+                document.getElementById('manual-config-view').style.display = 'block';
+                document.getElementById('classic-config-view').style.display = 'none';
+                
+                m_counts = [1, 0, 0, 0, 0];
+                if (unlockStage >= 1) m_counts[1] = 1;
+                if (unlockStage >= 2) m_counts[2] = 1;
+                if (unlockStage >= 4) m_counts[3] = 1;
+                if (unlockStage >= 5) m_counts[4] = 1;
+                
+                let r = getRules();
+                m_size = r.size;
+                m_rot = r.rot; m_sym = r.sym; m_obs = r.obs; m_blk = r.blk;
+                m_dist = targetDist === 0 ? 6 : Math.min(targetDist, 10);
+                
+                syncManualUI();
+                updateUnlockUI();
+            } else {
+                gameMode = 'classic';
+                btn.innerText = "MODO CLÁSICO";
+                btn.style.backgroundColor = "var(--primary)";
+                document.getElementById('auto-config-view').style.display = 'none';
+                document.getElementById('manual-config-view').style.display = 'none';
+                document.getElementById('classic-config-view').style.display = 'block';
+            }
+            restartGame();
+        }
+
+        function toggleManualPiece(type) {
+            if (gameMode !== 'manual' || isPlayingSolution) return;
+
+            let current = m_counts[type - 1];
+
+            if (type === 1 || type === 2) {
+                m_counts[type - 1] = current === 0 ? 1 : 0;
+            } else {
+                let next = current + 1;
+                if (next > 2) next = 0;
+                
+                if (next === 2) {
+                    for (let i = 2; i < 5; i++) { 
+                        if (i !== (type - 1) && m_counts[i] === 2) m_counts[i] = 1;
+                    }
+                }
+                m_counts[type - 1] = next;
+            }
+
+            let total = m_counts.reduce((a,b)=>a+b, 0) + (m_blk ? 1 : 0);
+            if (total < 1) {
+                m_counts[type - 1] = current; 
+                return;
+            }
+
+            updateUnlockUI();
+            forceRecalculate();
+        }
+
+        function toggleManualRule(rule) {
+            if (gameMode !== 'manual' || isPlayingSolution) return;
+            if (rule === '4x4') m_size = document.getElementById('chk-4x4').checked ? 4 : 3;
+            if (rule === 'rot') m_rot = document.getElementById('chk-rot').checked;
+            if (rule === 'sym') m_sym = document.getElementById('chk-sym').checked;
+            if (rule === 'obs') m_obs = document.getElementById('chk-obs').checked;
+            if (rule === 'blk') m_blk = document.getElementById('chk-blk').checked;
+            updateUnlockUI();
+            forceRecalculate();
+        }
+
+        function syncManualUI() {
+            document.getElementById('chk-4x4').checked = m_size === 4;
+            document.getElementById('chk-rot').checked = m_rot;
+            document.getElementById('chk-sym').checked = m_sym;
+            document.getElementById('chk-obs').checked = m_obs;
+            document.getElementById('chk-blk').checked = m_blk;
+            document.getElementById('min-moves-display').innerText = m_dist;
+        }
+
+        function updateUnlockUI() {
+            let r = getRules();
+
+            if (r.size === 4) document.body.classList.add('theme-red');
+            else document.body.classList.remove('theme-red');
+
+            document.documentElement.style.setProperty('--grid-size', r.size);
+
+            let btnRotCW = document.getElementById('btn-rotcw');
+            let btnRotCCW = document.getElementById('btn-rotccw');
+            let btnFlipH = document.getElementById('btn-fliph');
+            let btnFlipV = document.getElementById('btn-flipv');
+
+            btnRotCW.disabled = !r.rot;
+            btnRotCCW.disabled = !r.rot;
+            btnFlipH.disabled = !r.sym;
+            btnFlipV.disabled = !r.sym;
+
+            if (gameMode === 'auto') {
+                document.getElementById('dot-1').className = consecutiveWins >= 1 ? "dot filled" : "dot";
+                document.getElementById('dot-2').className = consecutiveWins >= 2 ? "dot filled" : "dot";
+
+                let pText = "Progreso:";
+                if (unlockStage === 0) pText = "Desbloquear Dama (3x3):";
+                else if (unlockStage === 1) pText = "Desbloquear Torre:";
+                else if (unlockStage === 2) pText = "Desbloquear Giros:";
+                else if (unlockStage === 3) pText = "Desbloquear Alfil:";
+                else if (unlockStage === 4) pText = "Desbloquear Caballo:";
+                else if (unlockStage === 5) pText = "Desbloquear Simetrías:";
+                else if (unlockStage === 6) pText = "Alcanzar Objetivo 7:";
+                else if (unlockStage === 7) pText = "Alcanzar Objetivo 8:";
+                else if (unlockStage === 8) pText = "Alcanzar Objetivo 9:";
+                else if (unlockStage === 9) pText = "SALTAR A LIGA 4x4 (+30 Pts):";
+                else if (unlockStage === 10) pText = "Añadir Obstáculos (4x4):";
+                else if (unlockStage === 11) pText = "Kamikaze Negro:";
+                else pText = `Dificultad Nivel ${unlockStage}:`;
+                document.getElementById('prog-text').innerText = pText;
+                
+            } else if (gameMode === 'manual') {
+                for (let i = 0; i < 5; i++) {
+                    let wrapper = document.getElementById(`icon-${i+1}`).parentElement;
+                    let icon = document.getElementById(`icon-${i+1}`);
+                    let count = m_counts[i];
+                    
+                    icon.className = `piece p-${i+1} ${count > 0 ? 'active-icon' : 'inactive-icon'}`;
+                    if (count === 2) wrapper.classList.add('show-badge');
+                    else wrapper.classList.remove('show-badge');
+                }
+            } else if (gameMode === 'classic') {
+                updateClassicUI();
+            }
+        }
+
+        // --- SISTEMA DE DIBUJADO DE TABLEROS ---
+        function createBoards() {
+            let s = boardSize;
+            const mb = document.getElementById('main-board');
+            const tb = document.getElementById('target-board');
+            mb.innerHTML = ''; tb.innerHTML = '';
+            
+            for (let i = 0; i < s * s; i++) {
+                let x = i % s;
+                let y = Math.floor(i / s);
+                let bg = (x + y) % 2 === 0 ? 'light' : 'dark';
+                
+                let mc = document.createElement('div');
+                mc.className = `cell ${bg}`;
+                mc.id = `main-cell-${i}`;
+                mc.onclick = () => handleCellClick(i);
+                mb.appendChild(mc);
+
+                let tc = document.createElement('div');
+                tc.className = `cell ${bg}`;
+                tc.id = `target-cell-${i}`;
+                tb.appendChild(tc);
+            }
+            
+            let overlay = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            overlay.setAttribute("id", "board-overlay");
+            overlay.setAttribute("viewBox", "0 0 100 100");
+            overlay.setAttribute("preserveAspectRatio", "none");
+            overlay.innerHTML = `
+                <defs>
+                    <filter id="arrow-shadow" x="-30%" y="-30%" width="160%" height="160%">
+                        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.8"/>
+                    </filter>
+                </defs>
+                <g id="overlay-content"></g>
+            `;
+            mb.appendChild(overlay);
+        }
+
+        function renderAll() {
+            updateUnlockUI();
+            
+            document.getElementById('lvl-lbl').innerText = currentPhase;
+            document.getElementById('obj-lbl').innerText = targetDist;
+            const movLbl = document.getElementById('mov-lbl');
+            movLbl.innerText = movesCount;
+            movLbl.style.color = (movesCount > targetDist) ? "#d32f2f" : "var(--primary)";
+            
+            renderGrid('main', currentGrid, selectedIdx);
+            renderGrid('target', targetGrid, null);
+        }
+
+        function renderGrid(prefix, g, selIdx) {
+            for (let i = 0; i < g.length; i++) {
+                const cell = document.getElementById(`${prefix}-cell-${i}`);
+                if(!cell) continue; 
+                
+                cell.innerHTML = '';
+                cell.classList.remove('selected', 'blocked');
+                
+                let val = g[i];
+                if (val === 99) {
+                    cell.classList.add('blocked');
+                } else if (val !== 0) {
+                    if (selIdx === i && prefix === 'main') cell.classList.add('selected');
+                    const pDiv = document.createElement('div');
+                    let isBlack = val >= 6 && val <= 10;
+                    let type = isBlack ? val - 5 : val;
+                    pDiv.className = `piece p-${type}`;
+                    if (isBlack) pDiv.classList.add('piece-black');
+                    cell.appendChild(pDiv);
+                }
+            }
+        }
+
+        function initGame() {
+            startGrid = generateInitialSetup();
+            currentGrid = cloneGrid(startGrid);
+            totalScore = 0;
+            createBoards();
+            generateTarget();
+        }
+
+        function handleCellClick(idx) {
+            if (isPlayingSolution) return;
+            let val = currentGrid[idx];
+
+            if (selectedIdx !== null) {
+                if (selectedIdx === idx) { selectedIdx = null; renderAll(); return; }
+                
+                let p = currentGrid[selectedIdx];
+                let isBlack = p >= 6 && p <= 10;
+
+                if (val !== 0 && val !== 99) {
+                    let targetIsBlack = val >= 6 && val <= 10;
+                    if (isBlack === targetIsBlack) {
+                        selectedIdx = idx; renderAll(); return;
+                    }
+                }
+
+                let mockMoves = getValidMoves(currentGrid, {rot:false, sym:false, size: boardSize});
+                let validState = null;
+                
+                for(let mObj of mockMoves) {
+                    let m = mObj.grid;
+                    if (m[selectedIdx] === 0) {
+                        if (isBlack && val !== 0 && val !== 99) { 
+                            if (m[idx] === 0) { validState = m; break; }
+                        } else { 
+                            if (m[idx] === p) { validState = m; break; }
+                        }
+                    }
+                }
+
+                if (validState) {
+                    historyStates.push({ g: cloneGrid(currentGrid), moves: movesCount });
+                    currentGrid = validState;
+                    finalizeAction();
+                }
+
+            } else if (val !== 0 && val !== 99) {
+                selectedIdx = idx;
+                renderAll();
+            }
+        }
+
+        function undoMove() {
+            if (isPlayingSolution || historyStates.length === 0) return;
+            let last = historyStates.pop();
+            currentGrid = last.g;
+            movesCount = last.moves;
+            phaseUndos++;
+            selectedIdx = null;
+            renderAll();
+        }
+
+        function actionTransform(type) {
+            if (isPlayingSolution) return;
+            let r = getRules();
+            if (type.startsWith('rot') && !r.rot) return;
+            if (type.startsWith('flip') && !r.sym) return;
+            
+            historyStates.push({ g: cloneGrid(currentGrid), moves: movesCount });
+            
+            if (type === 'rotCW') currentGrid = applyRotCW(currentGrid, r.size);
+            if (type === 'rotCCW') currentGrid = applyRotCCW(currentGrid, r.size);
+            if (type === 'flipH') currentGrid = applyFlipH(currentGrid, r.size);
+            if (type === 'flipV') currentGrid = applyFlipV(currentGrid, r.size);
+            finalizeAction();
+        }
+
+        function finalizeAction() {
+            movesCount++;
+            selectedIdx = null;
+            renderAll();
+            
+            if (serializeGrid(currentGrid) === serializeGrid(targetGrid)) {
+                setTimeout(() => {
+                    let beatObj = movesCount < targetDist;
+                    let winObj = movesCount <= targetDist;
+                    
+                    let phaseScore;
+                    if (beatObj) {
+                        phaseScore = targetDist * 2;
+                    } else if (winObj) {
+                        phaseScore = targetDist;
+                    } else {
+                        phaseScore = -(movesCount - targetDist);
+                    }
+                    totalScore += phaseScore;
+                    
+                    const tbody = document.getElementById('history-body');
+                    const tr = document.createElement('tr');
+                    let cInt = movesCount > targetDist ? '#d32f2f' : (beatObj ? '#8e44ad' : 'var(--primary)');
+                    let cSc = phaseScore < 0 ? '#d32f2f' : (beatObj ? '#8e44ad' : '#27ae60');
+                    tr.innerHTML = `<td><strong>${currentPhase}</strong></td><td>${targetDist}</td><td style="color:${cInt}; font-weight:bold;">${movesCount}</td><td style="color:${cSc}; font-weight:bold;">${phaseScore}</td>`;
+                    tbody.prepend(tr);
+                    
+                    document.getElementById('score-lbl').innerText = totalScore;
+                    document.getElementById('score-lbl').style.color = totalScore < 0 ? '#d32f2f' : '#27ae60';
+
+                    if (beatObj) {
+                        alert(`¡ENHORABUENA!\nHas resuelto la fase en menos movimientos que el objetivo.\n¡Puntuación de fase duplicada (+${phaseScore} Pts)!`);
+                    }
+
+                    if (gameMode === 'auto' && totalScore < 0) {
+                        let levelMsg = document.getElementById('prog-text').innerText.replace(":", "");
+                        alert(`¡JUEGO TERMINADO!\nTu puntuación ha caído por debajo de cero.\nHas superado hasta la Fase ${currentPhase - 1} y llegado al Nivel:\n[ ${levelMsg} ]\n¡Buen intento!`);
+                        restartGame();
+                        return;
+                    }
+
+                    if (gameMode === 'auto') {
+                        if (winObj) {
+                            consecutiveWins++;
+                            if (consecutiveWins >= 2) {
+                                consecutiveWins = 0;
+                                if (unlockStage < 12) { 
+                                    unlockStage++;
+                                    if (unlockStage === 10) {
+                                        totalScore += 30;
+                                        document.getElementById('score-lbl').innerText = totalScore;
+                                        alert("¡NIVEL SUPERIOR DESBLOQUEADO!\nHas entrado en la Liga 4x4 (Rojo).\n+30 Puntos Extra.");
+                                    }
+                                }
+                            }
+                        } else {
+                            consecutiveWins = 0;
+                        }
+                    }
+                    
+                    currentPhase++;
+                    movesCount = 0;
+                    phaseUndos = 0;
+                    historyStates = [];
+                    
+                    startGrid = generateInitialSetup();
+                    currentGrid = cloneGrid(startGrid);
+                    createBoards(); 
+                    generateTarget();
+                }, 400); 
+            }
+        }
+
+        // GENERACIÓN ASÍNCRONA Y ASIGNACIÓN DE SOLUCIÓN
+        function generateTarget() {
+            document.getElementById('loading').style.display = 'flex';
+            
+            let attempts = 0;
+            let currentSearchDist = 6;
+            
+            if (gameMode === 'manual') currentSearchDist = m_dist;
+            else if (gameMode === 'classic') currentSearchDist = classicSize === 3 ? (Math.floor(Math.random() * 4) + 3) : (Math.floor(Math.random() * 4) + 4);
+            else {
+                let autoDistMap = [2, 3, 4, 4, 5, 5, 6, 7, 8, 9, 6, 7, 8];
+                currentSearchDist = unlockStage < autoDistMap.length ? autoDistMap[unlockStage] : 9;
+            }
+
+            document.getElementById('loading-sub').innerText = `Buscando a ${currentSearchDist} movs...`;
+
+            function tryGen() {
+                attempts++;
+                let res = calculateTargetState(startGrid, currentSearchDist);
+                
+                if (res.g !== null) {
+                    targetGrid = res.g;
+                    targetDist = res.d; 
+                    currentSolution = res.path; 
+                    if (gameMode === 'manual') {
+                        m_dist = targetDist;
+                        document.getElementById('min-moves-display').innerText = m_dist;
+                    }
+                    phaseStartTime = Date.now();
+                    renderAll();
+                    document.getElementById('loading').style.display = 'none';
+                } else {
+                    if (attempts > 15 && currentSearchDist > 1) {
+                        currentSearchDist--; 
+                        attempts = 0; 
+                        document.getElementById('loading-sub').innerText = `Ajustando a ${currentSearchDist} movs...`;
+                    }
+                    startGrid = generateInitialSetup();
+                    currentGrid = cloneGrid(startGrid);
+                    createBoards();
+                    setTimeout(tryGen, 10);
+                }
+            }
+
+            setTimeout(tryGen, 50);
+        }
+
+        function changeMinMoves(delta) {
+            if (gameMode !== 'manual' || isPlayingSolution) return;
+            let n = m_dist + delta;
+            if (n < 1) n = 1; 
+            if (n > 10) n = 10; 
+            m_dist = n;
+            document.getElementById('min-moves-display').innerText = m_dist;
+            forceRecalculate();
+        }
+
+        function forceRecalculate() {
+            if (isPlayingSolution) return;
+            movesCount = 0;
+            phaseUndos = 0;
+            historyStates = [];
+            
+            document.getElementById('loading').style.display = 'flex';
+            let currentSearchDist = m_dist;
+            document.getElementById('loading-sub').innerText = `Buscando a ${currentSearchDist} movs...`;
+            
+            let attempts = 0;
+            
+            function tryRecalc() {
+                attempts++;
+                let tempStart = generateInitialSetup();
+                let res = calculateTargetState(tempStart, currentSearchDist);
+                
+                if (res.g !== null) {
+                    startGrid = tempStart;
+                    targetGrid = res.g;
+                    targetDist = res.d;
+                    currentSolution = res.path; 
+                    m_dist = targetDist; 
+                    document.getElementById('min-moves-display').innerText = m_dist;
+                    
+                    currentGrid = cloneGrid(startGrid);
+                    createBoards();
+                    phaseStartTime = Date.now();
+                    renderAll();
+                    document.getElementById('loading').style.display = 'none';
+                } else {
+                    if (attempts > 15 && currentSearchDist > 1) {
+                        currentSearchDist--; 
+                        attempts = 0;
+                        document.getElementById('loading-sub').innerText = `Ajustando a ${currentSearchDist} movs...`;
+                    }
+                    setTimeout(tryRecalc, 10);
+                }
+            }
+            
+            setTimeout(tryRecalc, 50);
+        }
+
+        function resetPhase() {
+            if (isPlayingSolution) { exitSolutionMode(); return; }
+            movesCount = 0;
+            phaseUndos = 0;
+            historyStates = [];
+            
+            if (gameMode === 'manual') {
+                forceRecalculate();
+            } else {
+                startGrid = generateInitialSetup();
+                currentGrid = cloneGrid(startGrid);
+                createBoards();
+                generateTarget();
+            }
+        }
+
+        function restartGame() {
+            if (isPlayingSolution) exitSolutionMode();
+            document.getElementById('history-body').innerHTML = '';
+            currentPhase = 1;
+            movesCount = 0;
+            totalScore = 0;
+            unlockStage = 0;
+            consecutiveWins = 0;
+            phaseUndos = 0;
+            
+            document.getElementById('score-lbl').innerText = totalScore;
+            document.getElementById('score-lbl').style.color = '#27ae60';
+            
+            selectedIdx = null;
+            historyStates = [];
+            
+            if (gameMode === 'manual') {
+                forceRecalculate();
+            } else {
+                startGrid = generateInitialSetup();
+                currentGrid = cloneGrid(startGrid);
+                createBoards();
+                generateTarget();
+            }
+        }
+
+        initGame();
+        function openInstructions() { document.getElementById('instructions-modal').style.display = 'flex'; }
+        function closeInstructions() { document.getElementById('instructions-modal').style.display = 'none'; }
+    </script>
+</body>
+</html>
