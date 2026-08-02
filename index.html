@@ -10,7 +10,7 @@
     
     <style>
         :root {
-            /* PALETA CYBER DARK NEÓN */
+            /* PALETA CYBER DARK NEÓN (4x4) */
             --bg-color: #0b0e14;
             --surface-dark: rgba(20, 25, 35, 0.85);
             --surface-border: rgba(255, 42, 84, 0.25);
@@ -37,12 +37,14 @@
         }
 
         body.theme-blue {
+            /* PALETA CYBER AZUL (3x3) */
             --dark-square: #121e2b;
             --light-square: #1e3044;
             --primary: #00f0ff;
             --primary-hover: #00c4d4;
             --primary-glow: rgba(0, 240, 255, 0.4);
             --border-color: #00f0ff;
+            --surface-border: rgba(0, 240, 255, 0.25);
 
             /* Colores de botón 3D base (Modo Azul 3x3) - Gris oscuro */
             --btn-bottom: #252d3d;
@@ -164,7 +166,7 @@
             transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
-        .cell { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
+        .cell { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; transition: background-color 0.3s; }
         #main-board .cell { cursor: pointer; }
         .cell.dark { background-color: var(--dark-square); }
         .cell.light { background-color: var(--light-square); }
@@ -224,7 +226,7 @@
             gap: 6px;
         }
 
-        /* BOTONES DE ACCIÓN PRINCIPALES (Rotar, Girar) */
+        /* Botones táctiles 3D dinámicos a la Liga */
         button.btn-blue {
             border: none; color: #fff; font-size: 0.75rem; font-weight: 800; font-family: 'SUSE', sans-serif;
             border-radius: 8px; cursor: pointer; padding: 14px 4px;
@@ -234,9 +236,17 @@
             display: flex; justify-content: center; align-items: center;
         }
         button.btn-blue:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-shadow); }
-        button.btn-blue:disabled { background: #252b3b; color: #5a6578; box-shadow: none; cursor: not-allowed; opacity: 0.2; }
 
-        /* ESTÉTICA OSCURA UNIFICADA (Deshacer, 3x3, 4x4, Fase, Todo, Configs) */
+        /* Botones desactivados (Giros y simetrías cuando no aplican) */
+        button.btn-blue:disabled {
+            background: #252b3b;
+            color: #5a6578;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.2;
+        }
+
+        /* ESTÉTICA OSCURA UNIFICADA */
         .btn-dark {
             width: 100%; border: none; color: #d0d7de; font-size: 0.75rem; font-weight: 800; font-family: 'SUSE', sans-serif;
             border-radius: 8px; cursor: pointer; padding: 14px 4px;
@@ -246,17 +256,12 @@
             transition: all 0.1s ease;
         }
         .btn-dark:active:not(.inactive-size) { background: #252d3d; color: #fff; }
-        
+
         /* Opacidad 20% para tamaños no seleccionados */
-        .inactive-size {
-            opacity: 0.2 !important;
-            cursor: pointer;
-        }
+        .inactive-size { opacity: 0.2 !important; cursor: pointer; }
 
         /* FILAS ESTRUCTURALES UNIFICADAS (Grid perfecto) */
-        .undo-row, .action-row, .classic-sizes { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; 
-        }
+        .undo-row, .action-row, .classic-sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
 
         /* PANELES PLEGABLES */
         .panel-box {
@@ -264,12 +269,28 @@
             border-radius: 12px; padding: 12px; width: 100%; margin-top: 5px;
         }
 
+        /* ANIMACIONES MODO SOLUCIÓN */
+        @keyframes blink-anim {
+            0%, 100% { opacity: 1; filter: brightness(1.2); }
+            50% { opacity: 0.4; filter: brightness(1); }
+        }
+        @keyframes board-blink {
+            0%, 100% { border-color: var(--primary); box-shadow: 0 0 25px var(--primary-glow); }
+            50% { border-color: #fff; box-shadow: 0 0 35px rgba(255,255,255,0.8); }
+        }
+        .board-blinking { animation: board-blink 0.4s ease-in-out 2; }
+
         /* PIEZAS, OBSTÁCULOS Y SOLUCIÓN */
         .board-solution-locked {
             --dark-square: #2a303c !important; --light-square: #3a4354 !important;
             border-color: #5a6578 !important; box-shadow: 0 0 15px rgba(0,0,0,0.5) !important;
         }
+        
+        /* Efecto de fantasma para piezas regulares */
         .board-solution-locked .piece { filter: grayscale(100%) opacity(0.5); }
+        
+        /* Efecto de fantasma para el Kamikaze (Negro RGB puro 0,0,0 con transparencia) */
+        .board-solution-locked .piece.piece-black { filter: brightness(0) opacity(0.5); }
 
         #board-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
 
@@ -283,6 +304,7 @@
         .p-4 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 51 51'%3E%3Cpath d='M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2zM15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z' fill='%23fff' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E"); }
         .p-5 { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 49 49'%3E%3Cpath d='M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18' fill='%23fff' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26.5 C 6,24 10,23 11,24 C 11,24 11,22 10,21 C 10,21 11,20.12 11,20 C 11,20 10.09,19 11,18 C 11,18 10,17 11,16 C 11,16 11,15 12,15 C 12,15 13,14 13,15 C 13,15 14,14 15,15 C 15,15 15,14 16,14 C 16,14 15.53,13.2 16,13 C 16,13 17,12 17,13 C 17,13 18,12 19,12 C 19,12 19,11 20,11 C 20,11 21,10 21,10 C 21,10 21.5,10 22,10 Z' fill='%23fff' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E"); }
         
+        /* KAMIKAZE AHORA ABSORBE EL COLOR DEL TEMA ACTIVO (var(--primary)) */
         .piece-black { filter: brightness(0) drop-shadow(0 0 12px var(--primary)) drop-shadow(0 8px 10px rgba(0,0,0,0.8)); }
 
         .blocked {
@@ -306,7 +328,7 @@
         .history-container { max-height: 250px; overflow-y: auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
         table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.85rem; }
         th, td { padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        th { background: rgba(255,42,84,0.15); color: var(--primary); font-weight: 700; position: sticky; top:0;}
+        th { background: rgba(255,255,255,0.05); color: var(--primary); font-weight: 700; position: sticky; top:0;}
 
         /* BOTÓN FLOTANTE PISTA */
         .btn-solution {
@@ -815,7 +837,7 @@
             content.innerHTML = '';
             
             const strokeWidth = 2; 
-            const color = "rgb(255,42,84)"; 
+            const color = "var(--primary)"; 
             const filter = 'filter="url(#arrow-shadow)"';
             
             if (step.type === 'move' || step.type === 'capture') {
@@ -944,7 +966,7 @@
                 if (step.type === 'move') {
                     if (cellTo && cellTo.firstChild) cellTo.firstChild.style.animation = "blink-anim 0.4s ease-in-out infinite";
                 } else {
-                    if (cellTo) cellTo.style.backgroundColor = "rgba(255, 42, 84, 0.4)";
+                    if (cellTo) cellTo.style.backgroundColor = "var(--primary-glow)";
                 }
                 await delay(750); 
                 if (cellTo && cellTo.firstChild) cellTo.firstChild.style.animation = "";
