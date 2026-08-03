@@ -10,7 +10,7 @@
     
     <style>
         :root {
-            /* PALETA CYBER DARK NEÓN */
+            /* PALETA CYBER DARK NEÓN (4x4) */
             --bg-color: #0b0e14;
             --surface-dark: rgba(20, 25, 35, 0.85);
             --surface-border: rgba(255, 42, 84, 0.25);
@@ -37,6 +37,7 @@
         }
 
         body.theme-blue {
+            /* PALETA CYBER AZUL (3x3) */
             --dark-square: #121e2b;
             --light-square: #1e3044;
             --primary: #00f0ff;
@@ -323,6 +324,8 @@
             border-radius: 20px; padding: 24px; max-width: 420px; width: 100%; max-height: 85vh; overflow-y: auto;
         }
         .modal-content h2 { color: var(--primary); text-align: center; margin-bottom: 12px; font-weight: 800; }
+        .modal-content h3 { color: var(--accent-cyan); font-size: 1rem; margin-top: 15px; margin-bottom: 6px; }
+        .modal-content p, .modal-content ul { font-size: 0.88rem; color: #a0aec0; line-height: 1.5; }
         
         .history-container { max-height: 250px; overflow-y: auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
         table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.85rem; }
@@ -332,10 +335,10 @@
         /* BOTÓN FLOTANTE PISTA */
         .btn-solution {
             position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
-            border-radius: 50%; background: var(--accent-cyan); color: #0b0e14; border: none;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5), 0 6px 12px rgba(0,0,0,0.5);
+            border-radius: 50%; background: var(--primary); color: #0b0e14; border: none;
+            box-shadow: 0 0 20px var(--primary-glow), 0 6px 12px rgba(0,0,0,0.5);
             cursor: pointer; z-index: 500; display: flex; justify-content: center; align-items: center;
-            transition: transform 0.2s, background-color 0.3s;
+            transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
         }
         .btn-solution:active { transform: scale(0.9); }
         #solution-step-text { display: none; font-size: 1.8rem; font-weight: 800; margin-top: -2px;}
@@ -508,6 +511,14 @@
         <div class="modal-content">
             <h2>Instrucciones</h2>
             <p><strong>Meta:</strong> Consigue que tu tablero principal sea exactamente igual que la imagen "A conseguir".</p>
+            
+            <h3>Modos de Juego</h3>
+            <ul>
+                <li><strong>Clásico:</strong> Puzles infinitos (3x3 o 4x4) con reglas estándar. Ideal para practicar.</li>
+                <li><strong>Juego:</strong> Modo progresión. Supera los objetivos exactos para desbloquear nuevas piezas, reglas y el salto a la liga 4x4.</li>
+                <li><strong>Manual:</strong> Control total. Configura a tu gusto el tamaño, reglas, piezas y la dificultad exacta del puzle.</li>
+            </ul>
+
             <h3>Reglas de Puntuación</h3>
             <p>El valor <strong>Objetivo</strong> te indica el número mínimo de movimientos para resolver la fase.</p>
             <ul>
@@ -515,8 +526,10 @@
                 <li>Si logras resolverlo en <strong>menos</strong> movimientos, ¡Obtendrás puntuación doble!</li>
                 <li>Si excedes el Objetivo, la penalización es de <strong>-1 punto por cada movimiento extra</strong>.</li>
             </ul>
+            
             <h3>Kamikaze Negro</h3>
             <p>Es tuyo y lo mueves tú. Si lo mueves sobre una pieza blanca, se la come y <strong>ambas desaparecen del tablero</strong>.</p>
+            
             <button class="btn-blue" style="margin-top: 20px; width: 100%; padding: 10px;" onclick="closeInstructions()">¡Entendido!</button>
         </div>
     </div>
@@ -830,7 +843,6 @@
             }
         }
 
-        // DIBUJO DE FLECHAS SVG Y COLORES DINÁMICOS
         function drawArrow(step, sz) {
             const content = document.getElementById('overlay-content');
             if (!content) return;
@@ -874,38 +886,38 @@
 
                 content.innerHTML = `
                     <g ${filter} class="dynamic-svg-color">
-                        <line x1="${startX}" y1="${startY}" x2="${shaftX}" y2="${shaftY}" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="${endX},${endY} ${wing1X},${wing1Y} ${wing2X},${wing2Y}" fill="currentColor" />
+                        <line x1="${startX}" y1="${startY}" x2="${shaftX}" y2="${shaftY}" stroke="var(--primary)" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="${endX},${endY} ${wing1X},${wing1Y} ${wing2X},${wing2Y}" fill="var(--primary)" />
                     </g>
                 `;
             } else if (step.type === 'rotCW') {
                 content.innerHTML = `
                     <g ${filter} class="dynamic-svg-color">
-                        <path d="M 50 18 A 32 32 0 1 1 20 50" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="20,53 15,44 25,46" fill="currentColor" />
+                        <path d="M 50 18 A 32 32 0 1 1 20 50" fill="none" stroke="var(--primary)" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="20,53 15,44 25,46" fill="var(--primary)" />
                     </g>
                 `;
             } else if (step.type === 'rotCCW') {
                 content.innerHTML = `
                     <g ${filter} class="dynamic-svg-color">
-                        <path d="M 50 18 A 32 32 0 1 0 80 50" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="80,53 75,46 85,44" fill="currentColor" />
+                        <path d="M 50 18 A 32 32 0 1 0 80 50" fill="none" stroke="var(--primary)" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="80,53 75,46 85,44" fill="var(--primary)" />
                     </g>
                 `;
             } else if (step.type === 'flipH') {
                 content.innerHTML = `
                     <g ${filter} class="dynamic-svg-color">
-                        <line x1="22" y1="50" x2="78" y2="50" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="18,50 24,46 24,54" fill="currentColor" />
-                        <polygon points="82,50 76,46 76,54" fill="currentColor" />
+                        <line x1="22" y1="50" x2="78" y2="50" stroke="var(--primary)" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="18,50 24,46 24,54" fill="var(--primary)" />
+                        <polygon points="82,50 76,46 76,54" fill="var(--primary)" />
                     </g>
                 `;
             } else if (step.type === 'flipV') {
                 content.innerHTML = `
                     <g ${filter} class="dynamic-svg-color">
-                        <line x1="50" y1="22" x2="50" y2="78" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" />
-                        <polygon points="50,18 46,24 54,24" fill="currentColor" />
-                        <polygon points="50,82 46,76 54,76" fill="currentColor" />
+                        <line x1="50" y1="22" x2="50" y2="78" stroke="var(--primary)" stroke-width="${strokeWidth}" stroke-linecap="round" />
+                        <polygon points="50,18 46,24 54,24" fill="var(--primary)" />
+                        <polygon points="50,82 46,76 54,76" fill="var(--primary)" />
                     </g>
                 `;
             }
@@ -944,7 +956,7 @@
                 
                 btnIcon.style.display = 'none';
                 btnText.style.display = 'block';
-                btnSolution.style.backgroundColor = "var(--accent-cyan)";
+                btnSolution.style.backgroundColor = "var(--primary)";
                 solutionStepIndex = 0;
             }
 
@@ -1000,7 +1012,7 @@
             boardEl.style.pointerEvents = 'auto'; 
             
             const btnSolution = document.getElementById('btn-solution');
-            if (btnSolution) btnSolution.style.backgroundColor = "var(--accent-cyan)";
+            if (btnSolution) btnSolution.style.backgroundColor = "var(--primary)";
             
             clearArrow();
             renderAll(); 
