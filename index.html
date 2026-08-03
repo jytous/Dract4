@@ -29,9 +29,9 @@
             --text-color: #f0f4f8;
             --text-muted: #8a99ad;
             --border-color: #ff2a54;
-            --grid-size: 4; 
+            --grid-size: 3; 
 
-            /* Colores de botón 3D base (Modo Rojo 4x4) */
+            /* Colores de botón 3D base */
             --btn-bottom: #b8002a;
             --btn-shadow: #700019;
         }
@@ -260,8 +260,41 @@
         /* Opacidad 20% para tamaños no seleccionados */
         .inactive-size { opacity: 0.2 !important; cursor: pointer; }
 
+        /* TOOLTIP PROMOCIONAL 4x4 */
+        .tooltip-4x4 {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            right: -10px;
+            width: 140px;
+            background: var(--primary);
+            color: #0b0e14;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-align: center;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            z-index: 1000;
+            display: none;
+            animation: float-tooltip 1.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .tooltip-4x4::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 30px; /* Apunta al botón derecho */
+            border-width: 6px;
+            border-style: solid;
+            border-color: var(--primary) transparent transparent transparent;
+        }
+        @keyframes float-tooltip {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
         /* FILAS ESTRUCTURALES UNIFICADAS (Grid perfecto) */
-        .undo-row, .action-row, .classic-sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+        .undo-row, .action-row, .classic-sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; position: relative;}
 
         /* PANELES PLEGABLES */
         .panel-box {
@@ -325,7 +358,7 @@
         }
         .modal-content h2 { color: var(--primary); text-align: center; margin-bottom: 12px; font-weight: 800; }
         .modal-content h3 { color: var(--accent-cyan); font-size: 1rem; margin-top: 15px; margin-bottom: 6px; }
-        .modal-content p, .modal-content ul { font-size: 0.88rem; color: #a0aec0; line-height: 1.5; }
+        .modal-content p, .modal-content ul { font-size: 0.88rem; color: #a0aec0; line-height: 1.5; margin-left: 10px; }
         
         .history-container { max-height: 250px; overflow-y: auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
         table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.85rem; }
@@ -362,7 +395,7 @@
         .diff-controls button { width: auto; padding: 4px 12px; font-size: 1rem; }
     </style>
 </head>
-<body class="theme-red">
+<body class="theme-blue">
 
     <div id="loading">
         <div id="loading-text" style="text-shadow: 0 0 10px var(--primary-glow);">CALCULANDO NIVEL...</div>
@@ -438,6 +471,11 @@
                     <div class="classic-sizes" id="classic-sizes">
                         <button class="btn-dark" id="btn-classic-3" onclick="setClassicSize(3)">3x3</button>
                         <button class="btn-dark inactive-size" id="btn-classic-4" onclick="setClassicSize(4)">4x4</button>
+                        
+                        <!-- Tooltip Animado Promocional 4x4 -->
+                        <div id="tooltip-4x4" class="tooltip-4x4">
+                            ¡Dominas el 3x3!<br>¿Te atreves con 4x4?
+                        </div>
                     </div>
                 </div>
 
@@ -537,12 +575,12 @@
     <script>
         // === MOTOR MATEMÁTICO DRACT 4 ===
         let gameMode = 'classic'; 
-        let classicSize = 4;
+        let classicSize = 3; // INICIO 3x3 POR DEFECTO
+        let boardSize = 3;
         
         let startGrid = null;   
         let currentGrid = null; 
         let targetGrid = null;  
-        let boardSize = 4;
         
         let historyStates = [];
         let currentPhase = 1;
@@ -553,6 +591,8 @@
 
         let unlockStage = 0; 
         let consecutiveWins = 0;
+        let perfectPhasesCount = 0; // CONTADOR PARA EL TOOLTIP
+        let hasShown4x4Tooltip = false;
         
         let currentSolution = [];
         let isPlayingSolution = false;
@@ -584,6 +624,11 @@
 
         function setClassicSize(sz) {
             if (isPlayingSolution) exitSolutionMode();
+            
+            // Ocultar tooltip si lo clican
+            const tt = document.getElementById('tooltip-4x4');
+            if (tt) tt.style.display = 'none';
+
             if (gameMode === 'manual') {
                 m_size = sz;
                 updateClassicUI();
@@ -1318,6 +1363,7 @@
                 setTimeout(() => {
                     let beatObj = movesCount < targetDist;
                     let winObj = movesCount <= targetDist;
+                    let perfectObj = movesCount === targetDist;
                     
                     let phaseScore;
                     if (beatObj) phaseScore = targetDist * 2;
@@ -1337,6 +1383,18 @@
                     document.getElementById('score-lbl').style.color = totalScore < 0 ? '#ff2a54' : 'var(--accent-green)';
 
                     if (beatObj) alert(`¡ENHORABUENA!\n¡Puntuación duplicada (+${phaseScore} Pts)!`);
+
+                    // SISTEMA DE PROGRESIÓN (TOOLTIP) EN 3x3 CLÁSICO
+                    if (gameMode === 'classic' && classicSize === 3 && (beatObj || perfectObj)) {
+                        perfectPhasesCount++;
+                        if (perfectPhasesCount >= 5 && !hasShown4x4Tooltip) {
+                            hasShown4x4Tooltip = true;
+                            setTimeout(() => {
+                                const tt = document.getElementById('tooltip-4x4');
+                                if (tt) tt.style.display = 'block';
+                            }, 1000);
+                        }
+                    }
 
                     if (gameMode === 'auto' && totalScore < 0) {
                         alert(`¡JUEGO TERMINADO!\nTu puntuación ha caído por debajo de cero.`);
