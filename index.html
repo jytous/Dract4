@@ -666,11 +666,12 @@
             }
             if (gameMode === 'manual') return {size: m_size, rot: m_rot, sym: m_sym, obs: m_obs, blk: m_blk};
             
-            let r = {size: unlockStage >= 9 ? 4 : 3, rot: false, sym: false, obs: false, blk: false};
+            // LA LIGA 4x4 AHORA SE DESBLOQUEA EN EL NIVEL 8 (Tras completar objetivo 7)
+            let r = {size: unlockStage >= 8 ? 4 : 3, rot: false, sym: false, obs: false, blk: false};
             if (unlockStage >= 3) r.rot = true;
             if (unlockStage >= 6) r.sym = true;
-            if (unlockStage >= 9) r.obs = true;
-            if (unlockStage >= 10) r.blk = true;
+            if (unlockStage >= 8) r.obs = true;
+            if (unlockStage >= 9) r.blk = true;
             return r;
         }
 
@@ -1235,6 +1236,7 @@
                 if(dot1) dot1.style.background = consecutiveWins >= 1 ? "var(--accent-green)" : "#444";
                 if(dot2) dot2.style.background = consecutiveWins >= 2 ? "var(--accent-green)" : "#444";
 
+                // TEXTOS DE PROGRESIÓN ACTUALIZADOS (El salto a 4x4 es en el Nivel 7)
                 let pText = "Progreso:";
                 if (unlockStage === 0) pText = "Desbloquear Dama (3x3):";
                 else if (unlockStage === 1) pText = "Desbloquear Torre:";
@@ -1243,10 +1245,9 @@
                 else if (unlockStage === 4) pText = "Desbloquear Caballo:";
                 else if (unlockStage === 5) pText = "Desbloquear Simetrías:";
                 else if (unlockStage === 6) pText = "Alcanzar Objetivo 7:";
-                else if (unlockStage === 7) pText = "Alcanzar Objetivo 8:";
-                else if (unlockStage === 8) pText = "SALTAR A LIGA 4x4 (+30 Pts):";
-                else if (unlockStage === 9) pText = "Añadir Obstáculos (4x4):";
-                else if (unlockStage === 10) pText = "Kamikaze Negro:";
+                else if (unlockStage === 7) pText = "SALTAR A LIGA 4x4 (+30 Pts):";
+                else if (unlockStage === 8) pText = "Añadir Obstáculos (4x4):";
+                else if (unlockStage === 9) pText = "Kamikaze Negro:";
                 else pText = `Dificultad Nivel ${unlockStage}:`;
                 document.getElementById('prog-text').innerText = pText;
                 
@@ -1463,7 +1464,8 @@
                                 consecutiveWins = 0;
                                 if (unlockStage < 11) { 
                                     unlockStage++;
-                                    if (unlockStage === 9) { // Nivel 9 equivale ahora al desbloqueo 4x4
+                                    // AHORA EL NIVEL 8 EQUIVALE AL SALTO A 4x4
+                                    if (unlockStage === 8) {
                                         totalScore += 30;
                                         document.getElementById('score-lbl').innerText = totalScore;
                                         showToast("¡NIVEL DESBLOQUEADO!", "Has saltado a la Liga 4x4 (+30 Pts Extra)", "var(--accent-cyan)", "var(--accent-cyan-glow)");
@@ -1493,8 +1495,8 @@
             if (gameMode === 'manual') currentSearchDist = m_dist;
             else if (gameMode === 'classic') currentSearchDist = Math.floor(Math.random() * 6) + 4; // 4 to 9
             else {
-                // Modificado para que el estadio 8 sea objetivo de 8 y el 9 sea 4x4
-                let autoDistMap = [2, 3, 4, 4, 5, 5, 6, 7, 8, 6, 7, 8];
+                // Secuencia actualizada: el salto de distancias
+                let autoDistMap = [2, 3, 4, 4, 5, 5, 6, 7, 6, 7, 8];
                 currentSearchDist = unlockStage < autoDistMap.length ? autoDistMap[unlockStage] : 9;
             }
 
